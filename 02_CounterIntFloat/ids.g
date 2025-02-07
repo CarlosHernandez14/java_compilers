@@ -8,10 +8,10 @@ inicio : (identificadores | flotante | entero)+ results;
 // Reglas sintácticas
 // Results imprime la cuenta de todas las variables encontradas
 results : RESULTS {System.out.println("Identificadores: " + cids + " Enteros: " + cint + " Flotantes: " + cfloat);};
-identificadores : ID+ {
-        System.out.println("Identificador: " + $ID.text);
-        cids++;
-    };
+identificadores : (ID { 
+        cids++; 
+        System.out.println("Identificador: " + $ID.text); 
+    })+ ;
 // Incrementa cfloat si encuentra flotante
 flotante: CFLOAT {cfloat++;};
 // Incrementa cint si encuentra entero
