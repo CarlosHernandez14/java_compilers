@@ -46,4 +46,44 @@ public interface sintaxisSimpleListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitTipo(sintaxisSimpleParser.TipoContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link sintaxisSimpleParser#instruccion}.
+	 * @param ctx the parse tree
+	 */
+	void enterInstruccion(sintaxisSimpleParser.InstruccionContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link sintaxisSimpleParser#instruccion}.
+	 * @param ctx the parse tree
+	 */
+	void exitInstruccion(sintaxisSimpleParser.InstruccionContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link sintaxisSimpleParser#expresion}.
+	 * @param ctx the parse tree
+	 */
+	void enterExpresion(sintaxisSimpleParser.ExpresionContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link sintaxisSimpleParser#expresion}.
+	 * @param ctx the parse tree
+	 */
+	void exitExpresion(sintaxisSimpleParser.ExpresionContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link sintaxisSimpleParser#multExp}.
+	 * @param ctx the parse tree
+	 */
+	void enterMultExp(sintaxisSimpleParser.MultExpContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link sintaxisSimpleParser#multExp}.
+	 * @param ctx the parse tree
+	 */
+	void exitMultExp(sintaxisSimpleParser.MultExpContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link sintaxisSimpleParser#atomExp}.
+	 * @param ctx the parse tree
+	 */
+	void enterAtomExp(sintaxisSimpleParser.AtomExpContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link sintaxisSimpleParser#atomExp}.
+	 * @param ctx the parse tree
+	 */
+	void exitAtomExp(sintaxisSimpleParser.AtomExpContext ctx);
 }
