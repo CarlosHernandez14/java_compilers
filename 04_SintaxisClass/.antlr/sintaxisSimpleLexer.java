@@ -1,4 +1,4 @@
-// Generated from c:/Users/carlo/Documents/LenguajesAutomatasJava/03_Ejercicio2/sintaxisSimple.g by ANTLR 4.13.1
+// Generated from c:/Users/carlo/Documents/LenguajesAutomatasJava/04_SintaxisClass/sintaxisClass.g by ANTLR 4.13.1
 import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.Token;
@@ -92,7 +92,7 @@ public class sintaxisSimpleLexer extends Lexer {
 	}
 
 	@Override
-	public String getGrammarFileName() { return "sintaxisSimple.g"; }
+	public String getGrammarFileName() { return "sintaxisClass.g"; }
 
 	@Override
 	public String[] getRuleNames() { return ruleNames; }
