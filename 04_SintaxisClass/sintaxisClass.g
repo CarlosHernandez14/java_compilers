@@ -1,21 +1,42 @@
 grammar sintaxisClass;
 
-@members{}       
+@members{
+    // Variables globales
+    // Lista de nombres con metodos declarados
+    java.util.List<String> metodos = new java.util.ArrayList<String>();
+    // Lista de nombres con propiedades declaradas
+    java.util.List<String> propiedades = new java.util.ArrayList<String>();
+}       
 
 program  : class_+  ;
 
 class_ : modificAcceso? 'class' ID 
         '{' 
-            attribute*
-            metodo*
+            member*
         '}' ;
 
 // Reglas sintácticas
-attribute : declaracion ;
-metodo  : modificAcceso tipo ID '(' declaracion_args? ')'
+member  :  property | metodo ;
+property: modificAcceso? tipo ID ('=' expresion)? (',' ID ('=' expresion)?)* SEMICOLON { 
+                // Verificamos que la propiedad no haya sido declarada
+                if (propiedades.contains($ID.text)) {
+                    System.out.println("Error: La propiedad "+$ID.text+" ya ha sido declarada");
+                } else {
+                    propiedades.add($ID.text);
+                }
+            } ;
+
+metodo  : modificAcceso? tipo ID '(' declaracion_args? ')'
                '{'
                      instruccion* 
-               '}' ;                 
+               '}' { 
+                    // Verificamos que el metodo no haya sido declarado
+                    if (metodos.contains($ID.text)) {
+                        System.out.println("Error: El metodo "+$ID.text+" ya ha sido declarado");
+                    } else {
+                        metodos.add($ID.text);
+                    }
+                } ;                 
 
 modificAcceso: PUBLIC | PRIVATE | PROTECTED ;
 tipo         : INT    | DOUBLE  | CHAR | STRING | BOOLEAN ;
@@ -56,7 +77,13 @@ WS :  (' ' | '\n' | '\t' | '\r' )+  -> skip            ;
 //        aritméticas
 /*
 class TestClass{
+    private int id;
     int xGlobal; 
+    public int idMetodo(){
+            int x=5, b ,d=5;
+            x=(b*x)*d+345.4;
+    }
+
     public int idMetodo(){
             int x=5, b ,d=5;
             x=(b*x)*d+345.4;

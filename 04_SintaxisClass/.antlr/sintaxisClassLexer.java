@@ -39,7 +39,7 @@ public class sintaxisClassLexer extends Lexer {
 
 	private static String[] makeLiteralNames() {
 		return new String[] {
-			null, "'class'", "'{'", "'}'", "'('", "')'", "'='", "','", "'+'", "'-'", 
+			null, "'class'", "'{'", "'}'", "'='", "','", "'('", "')'", "'+'", "'-'", 
 			"'*'", "';'", "'int'", "'double'", "'char'", "'String'", "'boolean'", 
 			"'public'", "'private'", "'protected'", "'.'"
 		};
@@ -85,6 +85,13 @@ public class sintaxisClassLexer extends Lexer {
 	public Vocabulary getVocabulary() {
 		return VOCABULARY;
 	}
+
+
+	    // Variables globales
+	    // Lista de nombres con metodos declarados
+	    java.util.List<String> metodos = new java.util.ArrayList<String>();
+	    // Lista de nombres con propiedades declaradas
+	    java.util.List<String> propiedades = new java.util.ArrayList<String>();
 
 
 	public sintaxisClassLexer(CharStream input) {
@@ -165,9 +172,9 @@ public class sintaxisClassLexer extends Lexer {
 		"c\u0000\u000023\u0005l\u0000\u000034\u0005a\u0000\u000045\u0005s\u0000"+
 		"\u000056\u0005s\u0000\u00006\u0002\u0001\u0000\u0000\u000078\u0005{\u0000"+
 		"\u00008\u0004\u0001\u0000\u0000\u00009:\u0005}\u0000\u0000:\u0006\u0001"+
-		"\u0000\u0000\u0000;<\u0005(\u0000\u0000<\b\u0001\u0000\u0000\u0000=>\u0005"+
-		")\u0000\u0000>\n\u0001\u0000\u0000\u0000?@\u0005=\u0000\u0000@\f\u0001"+
-		"\u0000\u0000\u0000AB\u0005,\u0000\u0000B\u000e\u0001\u0000\u0000\u0000"+
+		"\u0000\u0000\u0000;<\u0005=\u0000\u0000<\b\u0001\u0000\u0000\u0000=>\u0005"+
+		",\u0000\u0000>\n\u0001\u0000\u0000\u0000?@\u0005(\u0000\u0000@\f\u0001"+
+		"\u0000\u0000\u0000AB\u0005)\u0000\u0000B\u000e\u0001\u0000\u0000\u0000"+
 		"CD\u0005+\u0000\u0000D\u0010\u0001\u0000\u0000\u0000EF\u0005-\u0000\u0000"+
 		"F\u0012\u0001\u0000\u0000\u0000GH\u0005*\u0000\u0000H\u0014\u0001\u0000"+
 		"\u0000\u0000IJ\u0005;\u0000\u0000J\u0016\u0001\u0000\u0000\u0000KL\u0005"+
