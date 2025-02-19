@@ -1,4 +1,7 @@
 // Generated from c:/Users/carlo/Documents/LenguajesAutomatasJava/04_SintaxisClass/sintaxisClass.g by ANTLR 4.13.1
+
+    import java.util.HashMap;
+
 import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.Token;
@@ -88,10 +91,38 @@ public class sintaxisClassLexer extends Lexer {
 
 
 	    // Variables globales
-	    // Lista de nombres con metodos declarados
-	    java.util.List<String> metodos = new java.util.ArrayList<String>();
-	    // Lista de nombres con propiedades declaradas
-	    java.util.List<String> propiedades = new java.util.ArrayList<String>();
+
+	    // Hashmap of TSGlobal symbols
+	    HashMap<String, Integer> TSGlobal = new HashMap<String, Integer>();
+	    // TSLocal symbols
+	    HashMap<String, Integer> TSLocal = new HashMap<String, Integer>();
+
+	    // Method to insert on the symbols hasmap and verify if it is already declared
+	    public void pushTSGlobal(String id, SymbolType type) {
+	        // Verify if the symbol is already declared
+	        if (TSGlobal.containsKey(id)) {
+	            System.out.println("Error: La variable global "+id+" ya ha sido declarada");
+	        } else {
+	            // Insert the symbol on the hashmap
+	            TSGlobal.put(id, type.ordinal());
+	        }
+	    }
+
+	    // Method to insert on the symbols hasmap and verify if it is already declared
+	    public void pushTSLocal(String id, SymbolType type) {
+	        // Verify if the symbol is already declared
+	        if (TSLocal.containsKey(id)) {
+	            System.out.println("Error: La variable local "+id+" ya ha sido declarada");
+	        } else {
+	            // Insert the symbol on the hashmap
+	            TSLocal.put(id, type.ordinal());
+	        }
+	    }
+
+	    // Enum to map the symbols to a number to insert on the hashmap
+	    public enum SymbolType {
+	        INT, DOUBLE, CHAR, STRING, BOOLEAN, CLASS, METHOD
+	    }
 
 
 	public sintaxisClassLexer(CharStream input) {

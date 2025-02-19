@@ -1,16 +1,51 @@
 grammar sintaxisClass;
 
+@header{
+    import java.util.HashMap;
+}
+
 @members{
     // Variables globales
-    // Lista de nombres con metodos declarados
-    java.util.List<String> metodos = new java.util.ArrayList<String>();
-    // Lista de nombres con propiedades declaradas
-    java.util.List<String> propiedades = new java.util.ArrayList<String>();
+
+    // Hashmap of TSGlobal symbols
+    HashMap<String, Integer> TSGlobal = new HashMap<String, Integer>();
+    // TSLocal symbols
+    HashMap<String, Integer> TSLocal = new HashMap<String, Integer>();
+
+    // Method to insert on the symbols hasmap and verify if it is already declared
+    public void pushTSGlobal(String id, SymbolType type) {
+        // Verify if the symbol is already declared
+        if (TSGlobal.containsKey(id)) {
+            System.out.println("Error: La variable global "+id+" ya ha sido declarada");
+        } else {
+            // Insert the symbol on the hashmap
+            TSGlobal.put(id, type.ordinal());
+        }
+    }
+
+    // Method to insert on the symbols hasmap and verify if it is already declared
+    public void pushTSLocal(String id, SymbolType type) {
+        // Verify if the symbol is already declared
+        if (TSLocal.containsKey(id)) {
+            System.out.println("Error: La variable local "+id+" ya ha sido declarada");
+        } else {
+            // Insert the symbol on the hashmap
+            TSLocal.put(id, type.ordinal());
+        }
+    }
+
+    // Enum to map the symbols to a number to insert on the hashmap
+    public enum SymbolType {
+        INT, DOUBLE, CHAR, STRING, BOOLEAN, CLASS, METHOD
+    }
 }       
 
 program  : class_+  ;
 
-class_ : modificAcceso? 'class' ID 
+class_ : modificAcceso? 'class' ID { 
+            // Pushemos las variables globales al hashmap
+            pushTSGlobal($ID.text, SymbolType.CLASS);
+        }
         '{' 
             member*
         '}' ;
@@ -18,25 +53,18 @@ class_ : modificAcceso? 'class' ID
 // Reglas sintácticas
 member  :  property | metodo ;
 property: modificAcceso? tipo ID ('=' expresion)? (',' ID ('=' expresion)?)* SEMICOLON { 
-                // Verificamos que la propiedad no haya sido declarada
-                if (propiedades.contains($ID.text)) {
-                    System.out.println("Error: La propiedad "+$ID.text+" ya ha sido declarada");
-                } else {
-                    propiedades.add($ID.text);
-                }
+                // Pushemos las variables globales al hashmap
+                // Posible error cause the modifAcces are typen on LowerCase
+                pushTSGlobal($ID.text, SymbolType.valueOf(($tipo.text).toUpperCase()));
             } ;
 
-metodo  : modificAcceso? tipo ID '(' declaracion_args? ')'
+metodo  : modificAcceso? tipo ID { 
+                    // Push the method name to global symbols
+                    pushTSGlobal($ID.text, SymbolType.METHOD);
+                } '(' declaracion_args? ')'
                '{'
                      instruccion* 
-               '}' { 
-                    // Verificamos que el metodo no haya sido declarado
-                    if (metodos.contains($ID.text)) {
-                        System.out.println("Error: El metodo "+$ID.text+" ya ha sido declarado");
-                    } else {
-                        metodos.add($ID.text);
-                    }
-                } ;                 
+               '}' ;                 
 
 modificAcceso: PUBLIC | PRIVATE | PROTECTED ;
 tipo         : INT    | DOUBLE  | CHAR | STRING | BOOLEAN ;
@@ -44,7 +72,18 @@ tipo         : INT    | DOUBLE  | CHAR | STRING | BOOLEAN ;
 
 instruccion: asignacion  | declaracion ;
 asignacion: ID '=' expresion SEMICOLON ;
-declaracion: tipo ID ('=' expresion)? (',' ID ('=' expresion)?)* SEMICOLON ;
+declaracion: tipo 
+            ID { 
+                // Pushemos las variables locales al hashmap
+                pushTSLocal($ID.text, SymbolType.valueOf(($tipo.text).toUpperCase()));
+            } ('=' expresion)? 
+            (
+                ',' 
+                ID { 
+                    // Pushemos las variables locales al hashmap
+                    pushTSLocal($ID.text, SymbolType.valueOf(($tipo.text).toUpperCase()));
+                } ('=' expresion)?
+            )* SEMICOLON ;
 declaracion_args: tipo ID (',' tipo ID)* ;
 
 expresion  :  multExp (( '+' | '-' ) multExp)* ;
@@ -79,15 +118,13 @@ WS :  (' ' | '\n' | '\t' | '\r' )+  -> skip            ;
 class TestClass{
     private int id;
     int xGlobal; 
+    private int xGlobal;
     public int idMetodo(){
-            int x=5, b ,d=5;
+            int x=5, b ,d=5, x=9;
             x=(b*x)*d+345.4;
     }
-
-    public int idMetodo(){
-            int x=5, b ,d=5;
-            x=(b*x)*d+345.4;
-    }
+}
+class TestClass{
 }
 
    public int idMetodo2(){
