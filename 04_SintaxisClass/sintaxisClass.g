@@ -63,11 +63,13 @@ metodo  : modificAcceso? tipo ID {
                     pushTSGlobal($ID.text, SymbolType.METHOD);
                 } '(' declaracion_args? ')'
                '{'
-                     instruccion* 
+                     (instruccion | condicional)*
                '}' { 
                     // Clear the local symbols
                     TSLocal.clear();
-               } ;                 
+               } ; 
+
+condicional: IF '(' expresion ')' '{' instruccion* '}' (ELSE '{' instruccion* '}')? ;                
 
 modificAcceso: PUBLIC | PRIVATE | PROTECTED ;
 tipo         : INT    | DOUBLE  | CHAR | STRING | BOOLEAN ;
@@ -107,6 +109,9 @@ PUBLIC   : 'public'   ;
 PRIVATE  : 'private'  ;
 PROTECTED: 'protected';
 
+IF: 'if' ;
+ELSE: 'else' ;
+
 // Reglas lexicas para las expresiones
 DOT      : '.' ;
 CFLOAT   : CINT DOT CINT;
@@ -120,7 +125,7 @@ WS :  (' ' | '\n' | '\t' | '\r' )+  -> skip            ;
 /*
 class TestClass{
     private int id;
-    private int xGlobal;
+    private int xGlobal;-
     public int idMetodo(){
             int x=5, b ,d=5;
             x=(b*x)*d+345.4;
@@ -129,6 +134,11 @@ class TestClass{
     public int idMetodo2(){
             int x=5, b ,d=5;
             x=(b*x)*d+345.4;
+            if (x*x){
+                x=5;
+            }else{
+                x=6;
+            }
     }
 }
 class TestClass{
