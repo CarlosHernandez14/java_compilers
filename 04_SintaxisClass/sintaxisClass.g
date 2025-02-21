@@ -64,7 +64,10 @@ metodo  : modificAcceso? tipo ID {
                 } '(' declaracion_args? ')'
                '{'
                      instruccion* 
-               '}' ;                 
+               '}' { 
+                    // Clear the local symbols
+                    TSLocal.clear();
+               } ;                 
 
 modificAcceso: PUBLIC | PRIVATE | PROTECTED ;
 tipo         : INT    | DOUBLE  | CHAR | STRING | BOOLEAN ;
@@ -73,15 +76,15 @@ tipo         : INT    | DOUBLE  | CHAR | STRING | BOOLEAN ;
 instruccion: asignacion  | declaracion ;
 asignacion: ID '=' expresion SEMICOLON ;
 declaracion: tipo 
-            ID { 
+            id1=ID { 
                 // Pushemos las variables locales al hashmap
-                pushTSLocal($ID.text, SymbolType.valueOf(($tipo.text).toUpperCase()));
+                pushTSLocal($id1.text, SymbolType.valueOf(($tipo.text).toUpperCase()));
             } ('=' expresion)? 
             (
                 ',' 
-                ID { 
+                id2=ID { 
                     // Pushemos las variables locales al hashmap
-                    pushTSLocal($ID.text, SymbolType.valueOf(($tipo.text).toUpperCase()));
+                    pushTSLocal($id2.text, SymbolType.valueOf(($tipo.text).toUpperCase()));
                 } ('=' expresion)?
             )* SEMICOLON ;
 declaracion_args: tipo ID (',' tipo ID)* ;
@@ -117,10 +120,14 @@ WS :  (' ' | '\n' | '\t' | '\r' )+  -> skip            ;
 /*
 class TestClass{
     private int id;
-    int xGlobal; 
     private int xGlobal;
     public int idMetodo(){
-            int x=5, b ,d=5, x=9;
+            int x=5, b ,d=5;
+            x=(b*x)*d+345.4;
+    }
+
+    public int idMetodo2(){
+            int x=5, b ,d=5;
             x=(b*x)*d+345.4;
     }
 }
