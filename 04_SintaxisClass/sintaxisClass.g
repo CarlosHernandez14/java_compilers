@@ -140,6 +140,16 @@ class TestClass{
                 x=6;
             }
     }
+
+    public int idMetodo2(){
+            int x=5, b ,d=5;
+            x=(b*x)*d+345.4;
+            if (x*x){
+                x=5;
+            }else{
+                x=6;
+            }
+    }
 }
 class TestClass{
 }
