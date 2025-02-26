@@ -1,4 +1,7 @@
 // Generated from c:/Users/carlo/Documents/LenguajesAutomatasJava/04_SintaxisClass/sintaxisClass.g by ANTLR 4.13.1
+
+    import java.util.HashMap;
+
 import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.Token;
@@ -18,7 +21,7 @@ public class sintaxisClassLexer extends Lexer {
 	public static final int
 		T__0=1, T__1=2, T__2=3, T__3=4, T__4=5, T__5=6, T__6=7, T__7=8, T__8=9, 
 		T__9=10, SEMICOLON=11, INT=12, DOUBLE=13, CHAR=14, STRING=15, BOOLEAN=16, 
-		PUBLIC=17, PRIVATE=18, PROTECTED=19, DOT=20, CFLOAT=21, CINT=22, ID=23, 
+		PUBLIC=17, PRIVATE=18, PROTECTED=19, DOT=20, CDOUBLE=21, CINT=22, ID=23, 
 		WS=24;
 	public static String[] channelNames = {
 		"DEFAULT_TOKEN_CHANNEL", "HIDDEN"
@@ -32,7 +35,7 @@ public class sintaxisClassLexer extends Lexer {
 		return new String[] {
 			"T__0", "T__1", "T__2", "T__3", "T__4", "T__5", "T__6", "T__7", "T__8", 
 			"T__9", "SEMICOLON", "INT", "DOUBLE", "CHAR", "STRING", "BOOLEAN", "PUBLIC", 
-			"PRIVATE", "PROTECTED", "DOT", "CFLOAT", "CINT", "ID", "WS"
+			"PRIVATE", "PROTECTED", "DOT", "CDOUBLE", "CINT", "ID", "WS"
 		};
 	}
 	public static final String[] ruleNames = makeRuleNames();
@@ -49,7 +52,7 @@ public class sintaxisClassLexer extends Lexer {
 		return new String[] {
 			null, null, null, null, null, null, null, null, null, null, null, "SEMICOLON", 
 			"INT", "DOUBLE", "CHAR", "STRING", "BOOLEAN", "PUBLIC", "PRIVATE", "PROTECTED", 
-			"DOT", "CFLOAT", "CINT", "ID", "WS"
+			"DOT", "CDOUBLE", "CINT", "ID", "WS"
 		};
 	}
 	private static final String[] _SYMBOLIC_NAMES = makeSymbolicNames();
@@ -88,10 +91,44 @@ public class sintaxisClassLexer extends Lexer {
 
 
 	    // Variables globales
-	    // Lista de nombres con metodos declarados
-	    java.util.List<String> metodos = new java.util.ArrayList<String>();
-	    // Lista de nombres con propiedades declaradas
-	    java.util.List<String> propiedades = new java.util.ArrayList<String>();
+
+	    // Hashmap of TSGlobal symbols
+	    HashMap<String, Integer> TSGlobal = new HashMap<String, Integer>();
+	    // TSLocal symbols
+	    HashMap<String, Integer> TSLocal = new HashMap<String, Integer>();
+
+	    // Method to insert on the symbols hasmap and verify if it is already declared
+	    public void pushTSGlobal(String id, SymbolType type) {
+	        // Verify if the symbol is already declared
+	        if (TSGlobal.containsKey(id)) {
+	            System.out.println("Error: La variable global "+id+" ya ha sido declarada");
+	        } else {
+	            // Insert the symbol on the hashmap
+	            TSGlobal.put(id, type.ordinal());
+	        }
+	    }
+
+	    // Method to insert on the symbols hasmap and verify if it is already declared
+	    public void pushTSLocal(String id, SymbolType type) {
+	        // Verify if the symbol is already declared
+	        if (TSLocal.containsKey(id)) {
+	            System.out.println("Error: La variable local "+id+" ya ha sido declarada");
+	        } else {
+	            // Insert the symbol on the hashmap
+	            TSLocal.put(id, type.ordinal());
+	        }
+	    }
+
+	    // Enum to map the symbols to a number to insert on the hashmap
+	    public enum SymbolType {
+	        INT, DOUBLE, CHAR, STRING, BOOLEAN, CLASS, METHOD, ERROR_TYPE;
+
+	        private static final SymbolType[] values = values();
+
+	        public static SymbolType nameOf(int ordinal) {
+	            return values[ordinal];
+	        }
+	    }
 
 
 	public sintaxisClassLexer(CharStream input) {
