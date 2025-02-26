@@ -21,7 +21,7 @@ public class sintaxisClassParser extends Parser {
 	public static final int
 		T__0=1, T__1=2, T__2=3, T__3=4, T__4=5, T__5=6, T__6=7, T__7=8, T__8=9, 
 		T__9=10, SEMICOLON=11, INT=12, DOUBLE=13, CHAR=14, STRING=15, BOOLEAN=16, 
-		PUBLIC=17, PRIVATE=18, PROTECTED=19, DOT=20, CFLOAT=21, CINT=22, ID=23, 
+		PUBLIC=17, PRIVATE=18, PROTECTED=19, DOT=20, CDOUBLE=21, CINT=22, ID=23, 
 		WS=24;
 	public static final int
 		RULE_program = 0, RULE_class_ = 1, RULE_member = 2, RULE_property = 3, 
@@ -49,7 +49,7 @@ public class sintaxisClassParser extends Parser {
 		return new String[] {
 			null, null, null, null, null, null, null, null, null, null, null, "SEMICOLON", 
 			"INT", "DOUBLE", "CHAR", "STRING", "BOOLEAN", "PUBLIC", "PRIVATE", "PROTECTED", 
-			"DOT", "CFLOAT", "CINT", "ID", "WS"
+			"DOT", "CDOUBLE", "CINT", "ID", "WS"
 		};
 	}
 	private static final String[] _SYMBOLIC_NAMES = makeSymbolicNames();
@@ -130,7 +130,13 @@ public class sintaxisClassParser extends Parser {
 
 	    // Enum to map the symbols to a number to insert on the hashmap
 	    public enum SymbolType {
-	        INT, DOUBLE, CHAR, STRING, BOOLEAN, CLASS, METHOD
+	        INT, DOUBLE, CHAR, STRING, BOOLEAN, CLASS, METHOD, ERROR_TYPE;
+
+	        private static final SymbolType[] values = values();
+
+	        public static SymbolType nameOf(int ordinal) {
+	            return values[ordinal];
+	        }
 	    }
 
 	public sintaxisClassParser(TokenStream input) {
@@ -656,6 +662,8 @@ public class sintaxisClassParser extends Parser {
 
 	@SuppressWarnings("CheckReturnValue")
 	public static class AsignacionContext extends ParserRuleContext {
+		public Token ID;
+		public ExpresionContext expresion;
 		public TerminalNode ID() { return getToken(sintaxisClassParser.ID, 0); }
 		public ExpresionContext expresion() {
 			return getRuleContext(ExpresionContext.class,0);
@@ -674,12 +682,28 @@ public class sintaxisClassParser extends Parser {
 			enterOuterAlt(_localctx, 1);
 			{
 			setState(104);
-			match(ID);
+			((AsignacionContext)_localctx).ID = match(ID);
 			setState(105);
 			match(T__3);
 			setState(106);
-			expresion();
-			setState(107);
+			((AsignacionContext)_localctx).expresion = expresion();
+			 
+			                    System.out.println("Expression: "+(((AsignacionContext)_localctx).expresion!=null?_input.getText(((AsignacionContext)_localctx).expresion.start,((AsignacionContext)_localctx).expresion.stop):null) + " type: "+((AsignacionContext)_localctx).expresion.returnType);
+
+			                    // Verificar si el tipo de la expression coincide con el tipo de la variable para asignarla
+			                    if (TSLocal.containsKey((((AsignacionContext)_localctx).ID!=null?((AsignacionContext)_localctx).ID.getText():null))) {
+			                        if (TSLocal.get((((AsignacionContext)_localctx).ID!=null?((AsignacionContext)_localctx).ID.getText():null)) != ((AsignacionContext)_localctx).expresion.returnType.ordinal()) {
+			                            System.out.println("Error: No se puede asignar un tipo " + ((AsignacionContext)_localctx).expresion.returnType + " a la variable (" + (((AsignacionContext)_localctx).ID!=null?((AsignacionContext)_localctx).ID.getText():null) + ") de tipo "+SymbolType.nameOf(TSLocal.get((((AsignacionContext)_localctx).ID!=null?((AsignacionContext)_localctx).ID.getText():null))));
+			                        }
+			                    } else if (TSGlobal.containsKey((((AsignacionContext)_localctx).ID!=null?((AsignacionContext)_localctx).ID.getText():null))) {
+			                        if (TSGlobal.get((((AsignacionContext)_localctx).ID!=null?((AsignacionContext)_localctx).ID.getText():null)) != ((AsignacionContext)_localctx).expresion.returnType.ordinal()) {
+			                            System.out.println("Error: No se puede asignar un tipo" + ((AsignacionContext)_localctx).expresion.returnType + " a la variable (" + (((AsignacionContext)_localctx).ID!=null?((AsignacionContext)_localctx).ID.getText():null) + ") de tipo " + SymbolType.nameOf(TSGlobal.get((((AsignacionContext)_localctx).ID!=null?((AsignacionContext)_localctx).ID.getText():null))));
+			                        }
+			                    } else {
+			                       System.out.println("Error: La variable " + (((AsignacionContext)_localctx).ID!=null?((AsignacionContext)_localctx).ID.getText():null) + " no ha sido declarada");
+			                    }
+			                
+			setState(108);
 			match(SEMICOLON);
 			}
 		}
@@ -726,59 +750,59 @@ public class sintaxisClassParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(109);
-			((DeclaracionContext)_localctx).tipo = tipo();
 			setState(110);
+			((DeclaracionContext)_localctx).tipo = tipo();
+			setState(111);
 			((DeclaracionContext)_localctx).id1 = match(ID);
 			 
 			                // Pushemos las variables locales al hashmap
 			                pushTSLocal((((DeclaracionContext)_localctx).id1!=null?((DeclaracionContext)_localctx).id1.getText():null), SymbolType.valueOf(((((DeclaracionContext)_localctx).tipo!=null?_input.getText(((DeclaracionContext)_localctx).tipo.start,((DeclaracionContext)_localctx).tipo.stop):null)).toUpperCase()));
 			            
-			setState(114);
+			setState(115);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			if (_la==T__3) {
 				{
-				setState(112);
-				match(T__3);
 				setState(113);
+				match(T__3);
+				setState(114);
 				expresion();
 				}
 			}
 
-			setState(125);
+			setState(126);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			while (_la==T__4) {
 				{
 				{
-				setState(116);
-				match(T__4);
 				setState(117);
+				match(T__4);
+				setState(118);
 				((DeclaracionContext)_localctx).id2 = match(ID);
 				 
 				                    // Pushemos las variables locales al hashmap
 				                    pushTSLocal((((DeclaracionContext)_localctx).id2!=null?((DeclaracionContext)_localctx).id2.getText():null), SymbolType.valueOf(((((DeclaracionContext)_localctx).tipo!=null?_input.getText(((DeclaracionContext)_localctx).tipo.start,((DeclaracionContext)_localctx).tipo.stop):null)).toUpperCase()));
 				                
-				setState(121);
+				setState(122);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 				if (_la==T__3) {
 					{
-					setState(119);
-					match(T__3);
 					setState(120);
+					match(T__3);
+					setState(121);
 					expresion();
 					}
 				}
 
 				}
 				}
-				setState(127);
+				setState(128);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 			}
-			setState(128);
+			setState(129);
 			match(SEMICOLON);
 			}
 		}
@@ -818,25 +842,25 @@ public class sintaxisClassParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(130);
-			tipo();
 			setState(131);
+			tipo();
+			setState(132);
 			match(ID);
-			setState(138);
+			setState(139);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			while (_la==T__4) {
 				{
 				{
-				setState(132);
-				match(T__4);
 				setState(133);
-				tipo();
+				match(T__4);
 				setState(134);
+				tipo();
+				setState(135);
 				match(ID);
 				}
 				}
-				setState(140);
+				setState(141);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 			}
@@ -855,6 +879,9 @@ public class sintaxisClassParser extends Parser {
 
 	@SuppressWarnings("CheckReturnValue")
 	public static class ExpresionContext extends ParserRuleContext {
+		public SymbolType returnType;
+		public MultExpContext m1;
+		public MultExpContext m2;
 		public List<MultExpContext> multExp() {
 			return getRuleContexts(MultExpContext.class);
 		}
@@ -874,15 +901,18 @@ public class sintaxisClassParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(141);
-			multExp();
-			setState(146);
+			setState(142);
+			((ExpresionContext)_localctx).m1 = multExp();
+			 
+			                                        ((ExpresionContext)_localctx).returnType = ((ExpresionContext)_localctx).m1.returnType;
+			                                    
+			setState(148);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			while (_la==T__7 || _la==T__8) {
 				{
 				{
-				setState(142);
+				setState(144);
 				_la = _input.LA(1);
 				if ( !(_la==T__7 || _la==T__8) ) {
 				_errHandler.recoverInline(this);
@@ -892,11 +922,11 @@ public class sintaxisClassParser extends Parser {
 					_errHandler.reportMatch(this);
 					consume();
 				}
-				setState(143);
-				multExp();
+				setState(145);
+				((ExpresionContext)_localctx).m2 = multExp();
 				}
 				}
-				setState(148);
+				setState(150);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 			}
@@ -915,6 +945,9 @@ public class sintaxisClassParser extends Parser {
 
 	@SuppressWarnings("CheckReturnValue")
 	public static class MultExpContext extends ParserRuleContext {
+		public SymbolType returnType;
+		public AtomExpContext a1;
+		public AtomExpContext a2;
 		public List<AtomExpContext> atomExp() {
 			return getRuleContexts(AtomExpContext.class);
 		}
@@ -934,21 +967,30 @@ public class sintaxisClassParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(149);
-			atomExp();
-			setState(154);
+			setState(151);
+			((MultExpContext)_localctx).a1 = atomExp();
+			 
+			                                        ((MultExpContext)_localctx).returnType = ((MultExpContext)_localctx).a1.returnType;
+			                                    
+			setState(159);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			while (_la==T__9) {
 				{
 				{
-				setState(150);
+				setState(153);
 				match(T__9);
-				setState(151);
-				atomExp();
+				setState(154);
+				((MultExpContext)_localctx).a2 = atomExp();
+				 
+				                                        if (((MultExpContext)_localctx).a2.returnType != ((MultExpContext)_localctx).a1.returnType) {
+				                                            ((MultExpContext)_localctx).returnType =  SymbolType.ERROR_TYPE;
+				                                            System.out.println("Error: Tipos de datos incompatibles");
+				                                        }
+				                                     
 				}
 				}
-				setState(156);
+				setState(161);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 			}
@@ -967,8 +1009,11 @@ public class sintaxisClassParser extends Parser {
 
 	@SuppressWarnings("CheckReturnValue")
 	public static class AtomExpContext extends ParserRuleContext {
+		public SymbolType returnType;
+		public Token ID;
+		public ExpresionContext expresion;
 		public TerminalNode CINT() { return getToken(sintaxisClassParser.CINT, 0); }
-		public TerminalNode CFLOAT() { return getToken(sintaxisClassParser.CFLOAT, 0); }
+		public TerminalNode CDOUBLE() { return getToken(sintaxisClassParser.CDOUBLE, 0); }
 		public TerminalNode ID() { return getToken(sintaxisClassParser.ID, 0); }
 		public ExpresionContext expresion() {
 			return getRuleContext(ExpresionContext.class,0);
@@ -983,38 +1028,54 @@ public class sintaxisClassParser extends Parser {
 		AtomExpContext _localctx = new AtomExpContext(_ctx, getState());
 		enterRule(_localctx, 26, RULE_atomExp);
 		try {
-			setState(164);
+			setState(173);
 			_errHandler.sync(this);
 			switch (_input.LA(1)) {
 			case CINT:
 				enterOuterAlt(_localctx, 1);
 				{
-				setState(157);
+				setState(162);
 				match(CINT);
+				 ((AtomExpContext)_localctx).returnType = SymbolType.INT; 
 				}
 				break;
-			case CFLOAT:
+			case CDOUBLE:
 				enterOuterAlt(_localctx, 2);
 				{
-				setState(158);
-				match(CFLOAT);
+				setState(164);
+				match(CDOUBLE);
+				 ((AtomExpContext)_localctx).returnType = SymbolType.DOUBLE; 
 				}
 				break;
 			case ID:
 				enterOuterAlt(_localctx, 3);
 				{
-				setState(159);
-				match(ID);
+				setState(166);
+				((AtomExpContext)_localctx).ID = match(ID);
+				 
+				                                // Verify if the symbol is declared
+				                                if (!TSLocal.containsKey((((AtomExpContext)_localctx).ID!=null?((AtomExpContext)_localctx).ID.getText():null)) && !TSGlobal.containsKey((((AtomExpContext)_localctx).ID!=null?((AtomExpContext)_localctx).ID.getText():null))) {
+				                                    System.out.println("Error: La variable "+(((AtomExpContext)_localctx).ID!=null?((AtomExpContext)_localctx).ID.getText():null)+" no ha sido declarada");
+				                                }
+
+				                                // Verify if the symbol is declared on the local symbols
+				                                if (TSLocal.containsKey((((AtomExpContext)_localctx).ID!=null?((AtomExpContext)_localctx).ID.getText():null))) {
+				                                    ((AtomExpContext)_localctx).returnType =  SymbolType.valueOf(TSLocal.get((((AtomExpContext)_localctx).ID!=null?((AtomExpContext)_localctx).ID.getText():null)).toString());
+				                                } else {
+				                                    ((AtomExpContext)_localctx).returnType =  SymbolType.valueOf(TSGlobal.get((((AtomExpContext)_localctx).ID!=null?((AtomExpContext)_localctx).ID.getText():null)).toString());
+				                                }
+				                             
 				}
 				break;
 			case T__5:
 				enterOuterAlt(_localctx, 4);
 				{
-				setState(160);
+				setState(168);
 				match(T__5);
-				setState(161);
-				expresion();
-				setState(162);
+				setState(169);
+				((AtomExpContext)_localctx).expresion = expresion();
+				 ((AtomExpContext)_localctx).returnType = ((AtomExpContext)_localctx).expresion.returnType; 
+				setState(171);
 				match(T__6);
 				}
 				break;
@@ -1034,7 +1095,7 @@ public class sintaxisClassParser extends Parser {
 	}
 
 	public static final String _serializedATN =
-		"\u0004\u0001\u0018\u00a7\u0002\u0000\u0007\u0000\u0002\u0001\u0007\u0001"+
+		"\u0004\u0001\u0018\u00b0\u0002\u0000\u0007\u0000\u0002\u0001\u0007\u0001"+
 		"\u0002\u0002\u0007\u0002\u0002\u0003\u0007\u0003\u0002\u0004\u0007\u0004"+
 		"\u0002\u0005\u0007\u0005\u0002\u0006\u0007\u0006\u0002\u0007\u0007\u0007"+
 		"\u0002\b\u0007\b\u0002\t\u0007\t\u0002\n\u0007\n\u0002\u000b\u0007\u000b"+
@@ -1051,21 +1112,22 @@ public class sintaxisClassParser extends Parser {
 		"\u0005\u0004Y\b\u0004\n\u0004\f\u0004\\\t\u0004\u0001\u0004\u0001\u0004"+
 		"\u0001\u0004\u0001\u0005\u0001\u0005\u0001\u0006\u0001\u0006\u0001\u0007"+
 		"\u0001\u0007\u0003\u0007g\b\u0007\u0001\b\u0001\b\u0001\b\u0001\b\u0001"+
-		"\b\u0001\t\u0001\t\u0001\t\u0001\t\u0001\t\u0003\ts\b\t\u0001\t\u0001"+
-		"\t\u0001\t\u0001\t\u0001\t\u0003\tz\b\t\u0005\t|\b\t\n\t\f\t\u007f\t\t"+
-		"\u0001\t\u0001\t\u0001\n\u0001\n\u0001\n\u0001\n\u0001\n\u0001\n\u0005"+
-		"\n\u0089\b\n\n\n\f\n\u008c\t\n\u0001\u000b\u0001\u000b\u0001\u000b\u0005"+
-		"\u000b\u0091\b\u000b\n\u000b\f\u000b\u0094\t\u000b\u0001\f\u0001\f\u0001"+
-		"\f\u0005\f\u0099\b\f\n\f\f\f\u009c\t\f\u0001\r\u0001\r\u0001\r\u0001\r"+
-		"\u0001\r\u0001\r\u0001\r\u0003\r\u00a5\b\r\u0001\r\u0000\u0000\u000e\u0000"+
-		"\u0002\u0004\u0006\b\n\f\u000e\u0010\u0012\u0014\u0016\u0018\u001a\u0000"+
-		"\u0003\u0001\u0000\u0011\u0013\u0001\u0000\f\u0010\u0001\u0000\b\t\u00ad"+
-		"\u0000\u001d\u0001\u0000\u0000\u0000\u0002\"\u0001\u0000\u0000\u0000\u0004"+
-		"2\u0001\u0000\u0000\u0000\u00065\u0001\u0000\u0000\u0000\bL\u0001\u0000"+
+		"\b\u0001\b\u0001\t\u0001\t\u0001\t\u0001\t\u0001\t\u0003\tt\b\t\u0001"+
+		"\t\u0001\t\u0001\t\u0001\t\u0001\t\u0003\t{\b\t\u0005\t}\b\t\n\t\f\t\u0080"+
+		"\t\t\u0001\t\u0001\t\u0001\n\u0001\n\u0001\n\u0001\n\u0001\n\u0001\n\u0005"+
+		"\n\u008a\b\n\n\n\f\n\u008d\t\n\u0001\u000b\u0001\u000b\u0001\u000b\u0001"+
+		"\u000b\u0005\u000b\u0093\b\u000b\n\u000b\f\u000b\u0096\t\u000b\u0001\f"+
+		"\u0001\f\u0001\f\u0001\f\u0001\f\u0001\f\u0005\f\u009e\b\f\n\f\f\f\u00a1"+
+		"\t\f\u0001\r\u0001\r\u0001\r\u0001\r\u0001\r\u0001\r\u0001\r\u0001\r\u0001"+
+		"\r\u0001\r\u0001\r\u0003\r\u00ae\b\r\u0001\r\u0000\u0000\u000e\u0000\u0002"+
+		"\u0004\u0006\b\n\f\u000e\u0010\u0012\u0014\u0016\u0018\u001a\u0000\u0003"+
+		"\u0001\u0000\u0011\u0013\u0001\u0000\f\u0010\u0001\u0000\b\t\u00b6\u0000"+
+		"\u001d\u0001\u0000\u0000\u0000\u0002\"\u0001\u0000\u0000\u0000\u00042"+
+		"\u0001\u0000\u0000\u0000\u00065\u0001\u0000\u0000\u0000\bL\u0001\u0000"+
 		"\u0000\u0000\n`\u0001\u0000\u0000\u0000\fb\u0001\u0000\u0000\u0000\u000e"+
-		"f\u0001\u0000\u0000\u0000\u0010h\u0001\u0000\u0000\u0000\u0012m\u0001"+
-		"\u0000\u0000\u0000\u0014\u0082\u0001\u0000\u0000\u0000\u0016\u008d\u0001"+
-		"\u0000\u0000\u0000\u0018\u0095\u0001\u0000\u0000\u0000\u001a\u00a4\u0001"+
+		"f\u0001\u0000\u0000\u0000\u0010h\u0001\u0000\u0000\u0000\u0012n\u0001"+
+		"\u0000\u0000\u0000\u0014\u0083\u0001\u0000\u0000\u0000\u0016\u008e\u0001"+
+		"\u0000\u0000\u0000\u0018\u0097\u0001\u0000\u0000\u0000\u001a\u00ad\u0001"+
 		"\u0000\u0000\u0000\u001c\u001e\u0003\u0002\u0001\u0000\u001d\u001c\u0001"+
 		"\u0000\u0000\u0000\u001e\u001f\u0001\u0000\u0000\u0000\u001f\u001d\u0001"+
 		"\u0000\u0000\u0000\u001f \u0001\u0000\u0000\u0000 \u0001\u0001\u0000\u0000"+
@@ -1100,38 +1162,42 @@ public class sintaxisClassParser extends Parser {
 		"\u0000\u0000\u0000dg\u0003\u0010\b\u0000eg\u0003\u0012\t\u0000fd\u0001"+
 		"\u0000\u0000\u0000fe\u0001\u0000\u0000\u0000g\u000f\u0001\u0000\u0000"+
 		"\u0000hi\u0005\u0017\u0000\u0000ij\u0005\u0004\u0000\u0000jk\u0003\u0016"+
-		"\u000b\u0000kl\u0005\u000b\u0000\u0000l\u0011\u0001\u0000\u0000\u0000"+
-		"mn\u0003\f\u0006\u0000no\u0005\u0017\u0000\u0000or\u0006\t\uffff\uffff"+
-		"\u0000pq\u0005\u0004\u0000\u0000qs\u0003\u0016\u000b\u0000rp\u0001\u0000"+
-		"\u0000\u0000rs\u0001\u0000\u0000\u0000s}\u0001\u0000\u0000\u0000tu\u0005"+
-		"\u0005\u0000\u0000uv\u0005\u0017\u0000\u0000vy\u0006\t\uffff\uffff\u0000"+
-		"wx\u0005\u0004\u0000\u0000xz\u0003\u0016\u000b\u0000yw\u0001\u0000\u0000"+
-		"\u0000yz\u0001\u0000\u0000\u0000z|\u0001\u0000\u0000\u0000{t\u0001\u0000"+
-		"\u0000\u0000|\u007f\u0001\u0000\u0000\u0000}{\u0001\u0000\u0000\u0000"+
-		"}~\u0001\u0000\u0000\u0000~\u0080\u0001\u0000\u0000\u0000\u007f}\u0001"+
-		"\u0000\u0000\u0000\u0080\u0081\u0005\u000b\u0000\u0000\u0081\u0013\u0001"+
-		"\u0000\u0000\u0000\u0082\u0083\u0003\f\u0006\u0000\u0083\u008a\u0005\u0017"+
-		"\u0000\u0000\u0084\u0085\u0005\u0005\u0000\u0000\u0085\u0086\u0003\f\u0006"+
-		"\u0000\u0086\u0087\u0005\u0017\u0000\u0000\u0087\u0089\u0001\u0000\u0000"+
-		"\u0000\u0088\u0084\u0001\u0000\u0000\u0000\u0089\u008c\u0001\u0000\u0000"+
-		"\u0000\u008a\u0088\u0001\u0000\u0000\u0000\u008a\u008b\u0001\u0000\u0000"+
-		"\u0000\u008b\u0015\u0001\u0000\u0000\u0000\u008c\u008a\u0001\u0000\u0000"+
-		"\u0000\u008d\u0092\u0003\u0018\f\u0000\u008e\u008f\u0007\u0002\u0000\u0000"+
-		"\u008f\u0091\u0003\u0018\f\u0000\u0090\u008e\u0001\u0000\u0000\u0000\u0091"+
-		"\u0094\u0001\u0000\u0000\u0000\u0092\u0090\u0001\u0000\u0000\u0000\u0092"+
-		"\u0093\u0001\u0000\u0000\u0000\u0093\u0017\u0001\u0000\u0000\u0000\u0094"+
-		"\u0092\u0001\u0000\u0000\u0000\u0095\u009a\u0003\u001a\r\u0000\u0096\u0097"+
-		"\u0005\n\u0000\u0000\u0097\u0099\u0003\u001a\r\u0000\u0098\u0096\u0001"+
-		"\u0000\u0000\u0000\u0099\u009c\u0001\u0000\u0000\u0000\u009a\u0098\u0001"+
-		"\u0000\u0000\u0000\u009a\u009b\u0001\u0000\u0000\u0000\u009b\u0019\u0001"+
-		"\u0000\u0000\u0000\u009c\u009a\u0001\u0000\u0000\u0000\u009d\u00a5\u0005"+
-		"\u0016\u0000\u0000\u009e\u00a5\u0005\u0015\u0000\u0000\u009f\u00a5\u0005"+
-		"\u0017\u0000\u0000\u00a0\u00a1\u0005\u0006\u0000\u0000\u00a1\u00a2\u0003"+
-		"\u0016\u000b\u0000\u00a2\u00a3\u0005\u0007\u0000\u0000\u00a3\u00a5\u0001"+
-		"\u0000\u0000\u0000\u00a4\u009d\u0001\u0000\u0000\u0000\u00a4\u009e\u0001"+
-		"\u0000\u0000\u0000\u00a4\u009f\u0001\u0000\u0000\u0000\u00a4\u00a0\u0001"+
-		"\u0000\u0000\u0000\u00a5\u001b\u0001\u0000\u0000\u0000\u0013\u001f\"+"+
-		"25;AELSZfry}\u008a\u0092\u009a\u00a4";
+		"\u000b\u0000kl\u0006\b\uffff\uffff\u0000lm\u0005\u000b\u0000\u0000m\u0011"+
+		"\u0001\u0000\u0000\u0000no\u0003\f\u0006\u0000op\u0005\u0017\u0000\u0000"+
+		"ps\u0006\t\uffff\uffff\u0000qr\u0005\u0004\u0000\u0000rt\u0003\u0016\u000b"+
+		"\u0000sq\u0001\u0000\u0000\u0000st\u0001\u0000\u0000\u0000t~\u0001\u0000"+
+		"\u0000\u0000uv\u0005\u0005\u0000\u0000vw\u0005\u0017\u0000\u0000wz\u0006"+
+		"\t\uffff\uffff\u0000xy\u0005\u0004\u0000\u0000y{\u0003\u0016\u000b\u0000"+
+		"zx\u0001\u0000\u0000\u0000z{\u0001\u0000\u0000\u0000{}\u0001\u0000\u0000"+
+		"\u0000|u\u0001\u0000\u0000\u0000}\u0080\u0001\u0000\u0000\u0000~|\u0001"+
+		"\u0000\u0000\u0000~\u007f\u0001\u0000\u0000\u0000\u007f\u0081\u0001\u0000"+
+		"\u0000\u0000\u0080~\u0001\u0000\u0000\u0000\u0081\u0082\u0005\u000b\u0000"+
+		"\u0000\u0082\u0013\u0001\u0000\u0000\u0000\u0083\u0084\u0003\f\u0006\u0000"+
+		"\u0084\u008b\u0005\u0017\u0000\u0000\u0085\u0086\u0005\u0005\u0000\u0000"+
+		"\u0086\u0087\u0003\f\u0006\u0000\u0087\u0088\u0005\u0017\u0000\u0000\u0088"+
+		"\u008a\u0001\u0000\u0000\u0000\u0089\u0085\u0001\u0000\u0000\u0000\u008a"+
+		"\u008d\u0001\u0000\u0000\u0000\u008b\u0089\u0001\u0000\u0000\u0000\u008b"+
+		"\u008c\u0001\u0000\u0000\u0000\u008c\u0015\u0001\u0000\u0000\u0000\u008d"+
+		"\u008b\u0001\u0000\u0000\u0000\u008e\u008f\u0003\u0018\f\u0000\u008f\u0094"+
+		"\u0006\u000b\uffff\uffff\u0000\u0090\u0091\u0007\u0002\u0000\u0000\u0091"+
+		"\u0093\u0003\u0018\f\u0000\u0092\u0090\u0001\u0000\u0000\u0000\u0093\u0096"+
+		"\u0001\u0000\u0000\u0000\u0094\u0092\u0001\u0000\u0000\u0000\u0094\u0095"+
+		"\u0001\u0000\u0000\u0000\u0095\u0017\u0001\u0000\u0000\u0000\u0096\u0094"+
+		"\u0001\u0000\u0000\u0000\u0097\u0098\u0003\u001a\r\u0000\u0098\u009f\u0006"+
+		"\f\uffff\uffff\u0000\u0099\u009a\u0005\n\u0000\u0000\u009a\u009b\u0003"+
+		"\u001a\r\u0000\u009b\u009c\u0006\f\uffff\uffff\u0000\u009c\u009e\u0001"+
+		"\u0000\u0000\u0000\u009d\u0099\u0001\u0000\u0000\u0000\u009e\u00a1\u0001"+
+		"\u0000\u0000\u0000\u009f\u009d\u0001\u0000\u0000\u0000\u009f\u00a0\u0001"+
+		"\u0000\u0000\u0000\u00a0\u0019\u0001\u0000\u0000\u0000\u00a1\u009f\u0001"+
+		"\u0000\u0000\u0000\u00a2\u00a3\u0005\u0016\u0000\u0000\u00a3\u00ae\u0006"+
+		"\r\uffff\uffff\u0000\u00a4\u00a5\u0005\u0015\u0000\u0000\u00a5\u00ae\u0006"+
+		"\r\uffff\uffff\u0000\u00a6\u00a7\u0005\u0017\u0000\u0000\u00a7\u00ae\u0006"+
+		"\r\uffff\uffff\u0000\u00a8\u00a9\u0005\u0006\u0000\u0000\u00a9\u00aa\u0003"+
+		"\u0016\u000b\u0000\u00aa\u00ab\u0006\r\uffff\uffff\u0000\u00ab\u00ac\u0005"+
+		"\u0007\u0000\u0000\u00ac\u00ae\u0001\u0000\u0000\u0000\u00ad\u00a2\u0001"+
+		"\u0000\u0000\u0000\u00ad\u00a4\u0001\u0000\u0000\u0000\u00ad\u00a6\u0001"+
+		"\u0000\u0000\u0000\u00ad\u00a8\u0001\u0000\u0000\u0000\u00ae\u001b\u0001"+
+		"\u0000\u0000\u0000\u0013\u001f\"+25;AELSZfsz~\u008b\u0094\u009f\u00ad";
 	public static final ATN _ATN =
 		new ATNDeserializer().deserialize(_serializedATN.toCharArray());
 	static {

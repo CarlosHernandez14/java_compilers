@@ -36,7 +36,13 @@ grammar sintaxisClass;
 
     // Enum to map the symbols to a number to insert on the hashmap
     public enum SymbolType {
-        INT, DOUBLE, CHAR, STRING, BOOLEAN, CLASS, METHOD
+        INT, DOUBLE, CHAR, STRING, BOOLEAN, CLASS, METHOD, ERROR_TYPE;
+
+        private static final SymbolType[] values = values();
+
+        public static SymbolType nameOf(int ordinal) {
+            return values[ordinal];
+        }
     }
 }       
 
@@ -74,7 +80,22 @@ tipo         : INT    | DOUBLE  | CHAR | STRING | BOOLEAN ;
 
 
 instruccion: asignacion  | declaracion ;
-asignacion: ID '=' expresion SEMICOLON ;
+asignacion: ID '=' expresion { 
+                    System.out.println("Expression: "+$expresion.text + " type: "+$expresion.returnType);
+
+                    // Verificar si el tipo de la expression coincide con el tipo de la variable para asignarla
+                    if (TSLocal.containsKey($ID.text)) {
+                        if (TSLocal.get($ID.text) != $expresion.returnType.ordinal()) {
+                            System.out.println("Error: No se puede asignar un tipo " + $expresion.returnType + " a la variable (" + $ID.text + ") de tipo "+SymbolType.nameOf(TSLocal.get($ID.text)));
+                        }
+                    } else if (TSGlobal.containsKey($ID.text)) {
+                        if (TSGlobal.get($ID.text) != $expresion.returnType.ordinal()) {
+                            System.out.println("Error: No se puede asignar un tipo" + $expresion.returnType + " a la variable (" + $ID.text + ") de tipo " + SymbolType.nameOf(TSGlobal.get($ID.text)));
+                        }
+                    } else {
+                       System.out.println("Error: La variable " + $ID.text + " no ha sido declarada");
+                    }
+                } SEMICOLON ;
 declaracion: tipo 
             id1=ID { 
                 // Pushemos las variables locales al hashmap
@@ -89,9 +110,36 @@ declaracion: tipo
             )* SEMICOLON ;
 declaracion_args: tipo ID (',' tipo ID)* ;
 
-expresion  :  multExp (( '+' | '-' ) multExp)* ;
-multExp    :  atomExp ('*' atomExp)* ;
-atomExp    :  CINT | CFLOAT | ID | '(' expresion ')' ;
+expresion returns [SymbolType returnType] :  m1=multExp { 
+                                        $returnType=$m1.returnType;
+                                    }
+                                    (( '+' | '-' ) m2=multExp)* ;
+multExp   returns [SymbolType returnType] :  a1=atomExp { 
+                                        $returnType=$a1.returnType;
+                                    }    
+                                    ('*' a2=atomExp { 
+                                        if ($a2.returnType != $a1.returnType) {
+                                            $returnType = SymbolType.ERROR_TYPE;
+                                            System.out.println("Error: Tipos de datos incompatibles");
+                                        }
+                                     }
+                                    )* ;
+atomExp   returns [SymbolType returnType] :  CINT { $returnType=SymbolType.INT; } 
+                            | CDOUBLE { $returnType=SymbolType.DOUBLE; }
+                            | ID { 
+                                // Verify if the symbol is declared
+                                if (!TSLocal.containsKey($ID.text) && !TSGlobal.containsKey($ID.text)) {
+                                    System.out.println("Error: La variable "+$ID.text+" no ha sido declarada");
+                                }
+
+                                // Verify if the symbol is declared on the local symbols
+                                if (TSLocal.containsKey($ID.text)) {
+                                    $returnType = SymbolType.valueOf(TSLocal.get($ID.text).toString());
+                                } else {
+                                    $returnType = SymbolType.valueOf(TSGlobal.get($ID.text).toString());
+                                }
+                             } 
+                            | '(' expresion { $returnType=$expresion.returnType; } ')' ;
 
 
 // Reglas léxicas
@@ -109,7 +157,7 @@ PROTECTED: 'protected';
 
 // Reglas lexicas para las expresiones
 DOT      : '.' ;
-CFLOAT   : CINT DOT CINT;
+CDOUBLE   : CINT DOT CINT;
 CINT    : ('0'..'9')+ ;
 
 ID :  ('a'..'z'|'A'..'Z'|'_') ('a'..'z'|'A'..'Z'|'0'..'9'|'_')* ;
@@ -132,6 +180,12 @@ class TestClass{
     }
 }
 class TestClass{
+    public int metodo1(){
+        int x, y;
+        x = 5*3;
+        y = 10.3*2.3;
+        z = 10;
+    }
 }
 
    public int idMetodo2(){
