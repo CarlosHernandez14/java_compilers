@@ -69,7 +69,7 @@ metodo  : modificAcceso? tipo ID {
                     pushTSGlobal($ID.text, SymbolType.METHOD);
                 } '(' declaracion_args? ')'
                '{'
-                     instruccion* 
+                     (instruccion | control_structure)* 
                '}' { 
                     // Clear the local symbols
                     TSLocal.clear();
@@ -78,10 +78,18 @@ metodo  : modificAcceso? tipo ID {
 modificAcceso: PUBLIC | PRIVATE | PROTECTED ;
 tipo         : INT    | DOUBLE  | CHAR | STRING | BOOLEAN ;
 
+// Reglas sintácticas para estructuras de control
+control_structure: conditional ;
+conditional: IF '(' expresion ')' '{' 
+                instruccion* 
+            '}' 
+            (ELSE '{' 
+                instruccion* 
+            '}')? ;
 
 instruccion: asignacion  | declaracion ;
 asignacion: ID '=' expresion { 
-                    System.out.println("Expression: "+$expresion.text + " type: "+$expresion.returnType);
+                    //System.out.println("Expression: "+$expresion.text + " type: "+$expresion.returnType);
 
                     // Verificar si el tipo de la expression coincide con el tipo de la variable para asignarla
                     if (TSLocal.containsKey($ID.text)) {
@@ -112,12 +120,22 @@ declaracion_args: tipo ID (',' tipo ID)* ;
 
 expresion returns [SymbolType returnType] :  m1=multExp { 
                                         $returnType=$m1.returnType;
+                                        //System.out.println("Expression: "+$m1.text + " type: "+$m1.returnType);
                                     }
-                                    (( '+' | '-' ) m2=multExp)* ;
+                                    (
+                                        ( '+' | '-' ) 
+                                        m2=multExp {
+                                            //System.out.println("Expression: "+$m2.text + " type: "+$m2.returnType);
+                                            if ($m2.returnType != $m1.returnType) {
+                                                $returnType = SymbolType.ERROR_TYPE;
+                                                System.out.println("Error: Tipos de datos incompatibles");
+                                            }
+                                        } 
+                                    )* ;
 multExp   returns [SymbolType returnType] :  a1=atomExp { 
                                         $returnType=$a1.returnType;
                                     }    
-                                    ('*' a2=atomExp { 
+                                    (('*' | '/') a2=atomExp { 
                                         if ($a2.returnType != $a1.returnType) {
                                             $returnType = SymbolType.ERROR_TYPE;
                                             System.out.println("Error: Tipos de datos incompatibles");
@@ -134,9 +152,9 @@ atomExp   returns [SymbolType returnType] :  CINT { $returnType=SymbolType.INT; 
 
                                 // Verify if the symbol is declared on the local symbols
                                 if (TSLocal.containsKey($ID.text)) {
-                                    $returnType = SymbolType.valueOf(TSLocal.get($ID.text).toString());
+                                    $returnType = SymbolType.nameOf(TSLocal.get($ID.text));
                                 } else {
-                                    $returnType = SymbolType.valueOf(TSGlobal.get($ID.text).toString());
+                                    $returnType = SymbolType.nameOf(TSGlobal.get($ID.text));
                                 }
                              } 
                             | '(' expresion { $returnType=$expresion.returnType; } ')' ;
@@ -155,9 +173,13 @@ PUBLIC   : 'public'   ;
 PRIVATE  : 'private'  ;
 PROTECTED: 'protected';
 
+//Reglas lexicas para estructuras de control
+IF       : 'if'       ;
+ELSE     : 'else'     ;
+
 // Reglas lexicas para las expresiones
 DOT      : '.' ;
-CDOUBLE   : CINT DOT CINT;
+CDOUBLE   : ('0'..'9')+ '.' ('0'..'9')*;
 CINT    : ('0'..'9')+ ;
 
 ID :  ('a'..'z'|'A'..'Z'|'_') ('a'..'z'|'A'..'Z'|'0'..'9'|'_')* ;
@@ -170,13 +192,17 @@ class TestClass{
     private int id;
     private int xGlobal;
     public int idMetodo(){
-            int x=5, b ,d=5;
-            x=(b*x)*d+345.4;
-    }
+        int x=5, b ,d=5;
+        x=(b*x)*d+345.4;
 
-    public int idMetodo2(){
-            int x=5, b ,d=5;
-            x=(b*x)*d+345.4;
+        b = 10.2*2.3;
+
+        if (5*5) {
+            x = 5;
+        } else {
+            x = 10;
+        }
+    
     }
 }
 class TestClass{
@@ -185,6 +211,12 @@ class TestClass{
         x = 5*3;
         y = 10.3*2.3;
         z = 10;
+
+        if (5*5) {
+            x = 5;
+        } else {
+            x = 10;
+        }
     }
 }
 
