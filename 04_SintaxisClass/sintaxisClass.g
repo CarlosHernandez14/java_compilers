@@ -5,6 +5,7 @@ grammar sintaxisClass;
 }
 
 @members{
+
     // Variables globales
 
     // Hashmap of TSGlobal symbols
@@ -80,11 +81,11 @@ tipo         : INT    | DOUBLE  | CHAR | STRING | BOOLEAN ;
 
 // Reglas sintácticas para estructuras de control
 control_structure: conditional ;
-conditional: IF '(' expresion ')' '{' 
-                instruccion* 
+conditional: IF '(' comparacion ')' '{' 
+                (instruccion | control_structure)* 
             '}' 
             (ELSE '{' 
-                instruccion* 
+                (instruccion | control_structure)*
             '}')? ;
 
 instruccion: asignacion  | declaracion ;
@@ -159,6 +160,8 @@ atomExp   returns [SymbolType returnType] :  CINT { $returnType=SymbolType.INT; 
                              } 
                             | '(' expresion { $returnType=$expresion.returnType; } ')' ;
 
+// Comparaciones
+comparacion: expresion (EQ | NEQ | GT | LT | GE | LE) expresion ;
 
 // Reglas léxicas
 
@@ -176,6 +179,14 @@ PROTECTED: 'protected';
 //Reglas lexicas para estructuras de control
 IF       : 'if'       ;
 ELSE     : 'else'     ;
+
+// Reglas lexicas para las comparaciones
+EQ       : '==' ;
+NEQ      : '!=' ;
+GT       : '>'  ;
+LT       : '<'  ;
+GE       : '>=' ;
+LE       : '<=' ;
 
 // Reglas lexicas para las expresiones
 DOT      : '.' ;
@@ -197,10 +208,17 @@ class TestClass{
 
         b = 10.2*2.3;
 
-        if (5*5) {
-            x = 5;
-        } else {
+        if (5 + 5/2==5) {
             x = 10;
+            if (x == 10) {
+                x = 5;
+            }
+        } else {
+            x = 10/2;
+
+            if (x == 5) {
+                x = 10;
+            }
         }
     
     }
