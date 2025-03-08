@@ -113,10 +113,15 @@ public class sintaxisClassLexer extends Lexer {
 	    HashMap<String, Integer> TSLocal = new HashMap<String, Integer>();
 
 	    // Method to insert on the symbols hasmap and verify if it is already declared
-	    public void pushTSGlobal(String id, SymbolType type) {
+	    public void pushTSGlobal(String id, SymbolType type, Token token) {
 	        // Verify if the symbol is already declared
 	        if (TSGlobal.containsKey(id)) {
-	            System.out.println("Error: La variable global "+id+" ya ha sido declarada");
+	            // System.out.println("Error: La variable global "+id+" ya ha sido declarada");
+	            errorListener.addSemanticError(
+	                "La variable global '" + id + "' ya ha sido declarada",
+	                token.getLine(),
+	                token.getCharPositionInLine()
+	            );
 	        } else {
 	            // Insert the symbol on the hashmap
 	            TSGlobal.put(id, type.ordinal());
@@ -124,10 +129,15 @@ public class sintaxisClassLexer extends Lexer {
 	    }
 
 	    // Method to insert on the symbols hasmap and verify if it is already declared
-	    public void pushTSLocal(String id, SymbolType type) {
+	    public void pushTSLocal(String id, SymbolType type, Token token) {
 	        // Verify if the symbol is already declared
 	        if (TSLocal.containsKey(id)) {
-	            System.out.println("Error: La variable local "+id+" ya ha sido declarada");
+	            // System.out.println("Error: La variable local "+id+" ya ha sido declarada");
+	            errorListener.addSemanticError(
+	                "La variable local '" + id + "' ya ha sido declarada",
+	                token.getLine(),
+	                token.getCharPositionInLine()
+	            );
 	        } else {
 	            // Insert the symbol on the hashmap
 	            TSLocal.put(id, type.ordinal());
