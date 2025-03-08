@@ -2,11 +2,21 @@ grammar sintaxisClass;
 
 @header{
     import java.util.HashMap;
+    import org.antlr.v4.runtime.Token; // Para acceder a getLine(), getCharPositionInLine()
 }
 
 @members{
 
     // Variables globales
+
+    // Custom error listener  que vamos a inyectar desde App.java por medio del setter
+    public CustomErrorListener errorListener;
+
+    // Por comodidad, un método setter
+    public void setCustomErrorListener(CustomErrorListener listener) {
+        this.errorListener = listener;
+    }
+
 
     // Hashmap of TSGlobal symbols
     HashMap<String, Integer> TSGlobal = new HashMap<String, Integer>();
@@ -14,10 +24,15 @@ grammar sintaxisClass;
     HashMap<String, Integer> TSLocal = new HashMap<String, Integer>();
 
     // Method to insert on the symbols hasmap and verify if it is already declared
-    public void pushTSGlobal(String id, SymbolType type) {
+    public void pushTSGlobal(String id, SymbolType type, Token token) {
         // Verify if the symbol is already declared
         if (TSGlobal.containsKey(id)) {
-            System.out.println("Error: La variable global "+id+" ya ha sido declarada");
+            // System.out.println("Error: La variable global "+id+" ya ha sido declarada");
+            errorListener.addSemanticError(
+                "La variable global '" + id + "' ya ha sido declarada",
+                token.getLine(),
+                token.getCharPositionInLine()
+            );
         } else {
             // Insert the symbol on the hashmap
             TSGlobal.put(id, type.ordinal());
@@ -25,10 +40,15 @@ grammar sintaxisClass;
     }
 
     // Method to insert on the symbols hasmap and verify if it is already declared
-    public void pushTSLocal(String id, SymbolType type) {
+    public void pushTSLocal(String id, SymbolType type, Token token) {
         // Verify if the symbol is already declared
         if (TSLocal.containsKey(id)) {
-            System.out.println("Error: La variable local "+id+" ya ha sido declarada");
+            // System.out.println("Error: La variable local "+id+" ya ha sido declarada");
+            errorListener.addSemanticError(
+                "La variable local '" + id + "' ya ha sido declarada",
+                token.getLine(),
+                token.getCharPositionInLine()
+            );
         } else {
             // Insert the symbol on the hashmap
             TSLocal.put(id, type.ordinal());
@@ -51,7 +71,7 @@ program  : class_+  ;
 
 class_ : modificAcceso? 'class' ID { 
             // Pushemos las variables globales al hashmap
-            pushTSGlobal($ID.text, SymbolType.CLASS);
+            pushTSGlobal($ID.text, SymbolType.CLASS, $ID); // Agrergamos el token para obtener la linea y columna
         }
         '{' 
             member*
@@ -62,12 +82,14 @@ member  :  property | metodo ;
 property: modificAcceso? tipo ID ('=' expresion)? (',' ID ('=' expresion)?)* SEMICOLON { 
                 // Pushemos las variables globales al hashmap
                 // Posible error cause the modifAcces are typen on LowerCase
-                pushTSGlobal($ID.text, SymbolType.valueOf(($tipo.text).toUpperCase()));
+                // Agregamos el toekn para obtener la linea y columna
+                pushTSGlobal($ID.text, SymbolType.valueOf(($tipo.text).toUpperCase()), $ID);
             } ;
 
 metodo  : modificAcceso? tipo ID { 
                     // Push the method name to global symbols
-                    pushTSGlobal($ID.text, SymbolType.METHOD);
+                    // Agrergamos el token para obtener la linea y columna
+                    pushTSGlobal($ID.text, SymbolType.METHOD, $ID);
                 } '(' declaracion_args? ')'
                '{'
                      (instruccion | control_structure)* 
@@ -95,26 +117,50 @@ asignacion: ID '=' expresion {
                     // Verificar si el tipo de la expression coincide con el tipo de la variable para asignarla
                     if (TSLocal.containsKey($ID.text)) {
                         if (TSLocal.get($ID.text) != $expresion.returnType.ordinal()) {
-                            System.out.println("Error: No se puede asignar un tipo " + $expresion.returnType + " a la variable (" + $ID.text + ") de tipo "+SymbolType.nameOf(TSLocal.get($ID.text)));
+                            // System.out.println("Error: No se puede asignar un tipo " + $expresion.returnType + " a la variable (" + $ID.text + ") de tipo "+SymbolType.nameOf(TSLocal.get($ID.text)));
+                            // Agregamos el error de semantica al errorListener en lugar de imprimirlo
+                            errorListener.addSemanticError(
+                                "No se puede asignar un tipo " + $expresion.returnType + 
+                                " a la variable (" + $ID.text + ") de tipo " +
+                                SymbolType.nameOf(TSLocal.get($ID.text)),
+                                $ID.getLine(),
+                                $ID.getCharPositionInLine()
+                            );
                         }
                     } else if (TSGlobal.containsKey($ID.text)) {
                         if (TSGlobal.get($ID.text) != $expresion.returnType.ordinal()) {
-                            System.out.println("Error: No se puede asignar un tipo" + $expresion.returnType + " a la variable (" + $ID.text + ") de tipo " + SymbolType.nameOf(TSGlobal.get($ID.text)));
+                            // System.out.println("Error: No se puede asignar un tipo" + $expresion.returnType + " a la variable (" + $ID.text + ") de tipo " + SymbolType.nameOf(TSGlobal.get($ID.text)));
+                            // Agregamos el error de semantica al errorListener
+                            errorListener.addSemanticError(
+                                "No se puede asignar un tipo " + $expresion.returnType +
+                                " a la variable (" + $ID.text + ") de tipo " +
+                                SymbolType.nameOf(TSGlobal.get($ID.text)),
+                                $ID.getLine(),
+                                $ID.getCharPositionInLine()
+                            );
                         }
                     } else {
-                       System.out.println("Error: La variable " + $ID.text + " no ha sido declarada");
+                       // System.out.println("Error: La variable " + $ID.text + " no ha sido declarada");
+                       // Agregamos el error de semantica al errorListener
+                       errorListener.addSemanticError(
+                            "La variable " + $ID.text + " no ha sido declarada",
+                            $ID.getLine(),
+                            $ID.getCharPositionInLine()
+                        );
                     }
                 } SEMICOLON ;
 declaracion: tipo 
             id1=ID { 
                 // Pushemos las variables locales al hashmap
-                pushTSLocal($id1.text, SymbolType.valueOf(($tipo.text).toUpperCase()));
+                // Agregamos el token para obtener la linea y columna
+                pushTSLocal($id1.text, SymbolType.valueOf(($tipo.text).toUpperCase()), $id1);
             } ('=' expresion)? 
             (
                 ',' 
                 id2=ID { 
                     // Pushemos las variables locales al hashmap
-                    pushTSLocal($id2.text, SymbolType.valueOf(($tipo.text).toUpperCase()));
+                    // Agregamos el token para obtener la linea y columna
+                    pushTSLocal($id2.text, SymbolType.valueOf(($tipo.text).toUpperCase()), $id2);
                 } ('=' expresion)?
             )* SEMICOLON ;
 declaracion_args: tipo ID (',' tipo ID)* ;
@@ -129,7 +175,13 @@ expresion returns [SymbolType returnType] :  m1=multExp {
                                             //System.out.println("Expression: "+$m2.text + " type: "+$m2.returnType);
                                             if ($m2.returnType != $m1.returnType) {
                                                 $returnType = SymbolType.ERROR_TYPE;
-                                                System.out.println("Error: Tipos de datos incompatibles");
+                                                // System.out.println("Error: Tipos de datos incompatibles");
+                                                // Agregamos el error de semantica al errorListener
+                                                errorListener.addSemanticError(
+                                                    "Tipos de datos incompatibles",
+                                                    $m2.start.getLine(),            // El primer token de la subregla
+                                                    $m2.start.getCharPositionInLine()
+                                                );
                                             }
                                         } 
                                     )* ;
@@ -139,7 +191,13 @@ multExp   returns [SymbolType returnType] :  a1=atomExp {
                                     (('*' | '/') a2=atomExp { 
                                         if ($a2.returnType != $a1.returnType) {
                                             $returnType = SymbolType.ERROR_TYPE;
-                                            System.out.println("Error: Tipos de datos incompatibles");
+                                            // System.out.println("Error: Tipos de datos incompatibles");
+                                            // Agregamos el error de semantica al errorListener
+                                            errorListener.addSemanticError(
+                                                "Tipos de datos incompatibles",
+                                                $a2.start.getLine(),
+                                                $a2.start.getCharPositionInLine()
+                                            );
                                         }
                                      }
                                     )* ;
@@ -148,7 +206,15 @@ atomExp   returns [SymbolType returnType] :  CINT { $returnType=SymbolType.INT; 
                             | ID { 
                                 // Verify if the symbol is declared
                                 if (!TSLocal.containsKey($ID.text) && !TSGlobal.containsKey($ID.text)) {
-                                    System.out.println("Error: La variable "+$ID.text+" no ha sido declarada");
+                                    // System.out.println("Error: La variable "+$ID.text+" no ha sido declarada");
+                                    errorListener.addSemanticError(
+                                        "La variable '" + $ID.text + "' no ha sido declarada",
+                                        $ID.getLine(),
+                                        $ID.getCharPositionInLine()
+                                    );
+                                    // Marcamos el tipo de la variable como error
+                                    $returnType = SymbolType.ERROR_TYPE;
+
                                 }
 
                                 // Verify if the symbol is declared on the local symbols

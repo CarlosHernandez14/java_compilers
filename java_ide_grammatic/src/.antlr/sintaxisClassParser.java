@@ -1,6 +1,7 @@
-// Generated from c:/Users/carlo/Documents/CompilersAntlr/java_compilers/04_SintaxisClass/sintaxisClass.g by ANTLR 4.13.1
+// Generated from c:/Users/carlo/Documents/CompilersAntlr/java_compilers/java_ide_grammatic/src/sintaxisClass.g by ANTLR 4.13.1
 
     import java.util.HashMap;
+    import org.antlr.v4.runtime.Token; // Para acceder a getLine(), getCharPositionInLine()
 
 import org.antlr.v4.runtime.atn.*;
 import org.antlr.v4.runtime.dfa.DFA;
@@ -107,16 +108,30 @@ public class sintaxisClassParser extends Parser {
 
 	    // Variables globales
 
+	    // Custom error listener  que vamos a inyectar desde App.java por medio del setter
+	    public CustomErrorListener errorListener;
+
+	    // Por comodidad, un método setter
+	    public void setCustomErrorListener(CustomErrorListener listener) {
+	        this.errorListener = listener;
+	    }
+
+
 	    // Hashmap of TSGlobal symbols
 	    HashMap<String, Integer> TSGlobal = new HashMap<String, Integer>();
 	    // TSLocal symbols
 	    HashMap<String, Integer> TSLocal = new HashMap<String, Integer>();
 
 	    // Method to insert on the symbols hasmap and verify if it is already declared
-	    public void pushTSGlobal(String id, SymbolType type) {
+	    public void pushTSGlobal(String id, SymbolType type, Token token) {
 	        // Verify if the symbol is already declared
 	        if (TSGlobal.containsKey(id)) {
-	            System.out.println("Error: La variable global "+id+" ya ha sido declarada");
+	            // System.out.println("Error: La variable global "+id+" ya ha sido declarada");
+	            errorListener.addSemanticError(
+	                "La variable global '" + id + "' ya ha sido declarada",
+	                token.getLine(),
+	                token.getCharPositionInLine()
+	            );
 	        } else {
 	            // Insert the symbol on the hashmap
 	            TSGlobal.put(id, type.ordinal());
@@ -124,10 +139,15 @@ public class sintaxisClassParser extends Parser {
 	    }
 
 	    // Method to insert on the symbols hasmap and verify if it is already declared
-	    public void pushTSLocal(String id, SymbolType type) {
+	    public void pushTSLocal(String id, SymbolType type, Token token) {
 	        // Verify if the symbol is already declared
 	        if (TSLocal.containsKey(id)) {
-	            System.out.println("Error: La variable local "+id+" ya ha sido declarada");
+	            // System.out.println("Error: La variable local "+id+" ya ha sido declarada");
+	            errorListener.addSemanticError(
+	                "La variable local '" + id + "' ya ha sido declarada",
+	                token.getLine(),
+	                token.getCharPositionInLine()
+	            );
 	        } else {
 	            // Insert the symbol on the hashmap
 	            TSLocal.put(id, type.ordinal());
@@ -162,14 +182,6 @@ public class sintaxisClassParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_program; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof sintaxisClassListener ) ((sintaxisClassListener)listener).enterProgram(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof sintaxisClassListener ) ((sintaxisClassListener)listener).exitProgram(this);
-		}
 	}
 
 	public final ProgramContext program() throws RecognitionException {
@@ -223,14 +235,6 @@ public class sintaxisClassParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_class_; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof sintaxisClassListener ) ((sintaxisClassListener)listener).enterClass_(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof sintaxisClassListener ) ((sintaxisClassListener)listener).exitClass_(this);
-		}
 	}
 
 	public final Class_Context class_() throws RecognitionException {
@@ -256,7 +260,7 @@ public class sintaxisClassParser extends Parser {
 			((Class_Context)_localctx).ID = match(ID);
 			 
 			            // Pushemos las variables globales al hashmap
-			            pushTSGlobal((((Class_Context)_localctx).ID!=null?((Class_Context)_localctx).ID.getText():null), SymbolType.CLASS);
+			            pushTSGlobal((((Class_Context)_localctx).ID!=null?((Class_Context)_localctx).ID.getText():null), SymbolType.CLASS, ((Class_Context)_localctx).ID); // Agrergamos el token para obtener la linea y columna
 			        
 			setState(45);
 			match(T__1);
@@ -301,14 +305,6 @@ public class sintaxisClassParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_member; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof sintaxisClassListener ) ((sintaxisClassListener)listener).enterMember(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof sintaxisClassListener ) ((sintaxisClassListener)listener).exitMember(this);
-		}
 	}
 
 	public final MemberContext member() throws RecognitionException {
@@ -370,14 +366,6 @@ public class sintaxisClassParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_property; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof sintaxisClassListener ) ((sintaxisClassListener)listener).enterProperty(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof sintaxisClassListener ) ((sintaxisClassListener)listener).exitProperty(this);
-		}
 	}
 
 	public final PropertyContext property() throws RecognitionException {
@@ -446,7 +434,8 @@ public class sintaxisClassParser extends Parser {
 			 
 			                // Pushemos las variables globales al hashmap
 			                // Posible error cause the modifAcces are typen on LowerCase
-			                pushTSGlobal((((PropertyContext)_localctx).ID!=null?((PropertyContext)_localctx).ID.getText():null), SymbolType.valueOf(((((PropertyContext)_localctx).tipo!=null?_input.getText(((PropertyContext)_localctx).tipo.start,((PropertyContext)_localctx).tipo.stop):null)).toUpperCase()));
+			                // Agregamos el toekn para obtener la linea y columna
+			                pushTSGlobal((((PropertyContext)_localctx).ID!=null?((PropertyContext)_localctx).ID.getText():null), SymbolType.valueOf(((((PropertyContext)_localctx).tipo!=null?_input.getText(((PropertyContext)_localctx).tipo.start,((PropertyContext)_localctx).tipo.stop):null)).toUpperCase()), ((PropertyContext)_localctx).ID);
 			            
 			}
 		}
@@ -490,14 +479,6 @@ public class sintaxisClassParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_metodo; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof sintaxisClassListener ) ((sintaxisClassListener)listener).enterMetodo(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof sintaxisClassListener ) ((sintaxisClassListener)listener).exitMetodo(this);
-		}
 	}
 
 	public final MetodoContext metodo() throws RecognitionException {
@@ -523,7 +504,8 @@ public class sintaxisClassParser extends Parser {
 			((MetodoContext)_localctx).ID = match(ID);
 			 
 			                    // Push the method name to global symbols
-			                    pushTSGlobal((((MetodoContext)_localctx).ID!=null?((MetodoContext)_localctx).ID.getText():null), SymbolType.METHOD);
+			                    // Agrergamos el token para obtener la linea y columna
+			                    pushTSGlobal((((MetodoContext)_localctx).ID!=null?((MetodoContext)_localctx).ID.getText():null), SymbolType.METHOD, ((MetodoContext)_localctx).ID);
 			                
 			setState(87);
 			match(T__5);
@@ -602,14 +584,6 @@ public class sintaxisClassParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_modificAcceso; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof sintaxisClassListener ) ((sintaxisClassListener)listener).enterModificAcceso(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof sintaxisClassListener ) ((sintaxisClassListener)listener).exitModificAcceso(this);
-		}
 	}
 
 	public final ModificAccesoContext modificAcceso() throws RecognitionException {
@@ -653,14 +627,6 @@ public class sintaxisClassParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_tipo; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof sintaxisClassListener ) ((sintaxisClassListener)listener).enterTipo(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof sintaxisClassListener ) ((sintaxisClassListener)listener).exitTipo(this);
-		}
 	}
 
 	public final TipoContext tipo() throws RecognitionException {
@@ -702,14 +668,6 @@ public class sintaxisClassParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_control_structure; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof sintaxisClassListener ) ((sintaxisClassListener)listener).enterControl_structure(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof sintaxisClassListener ) ((sintaxisClassListener)listener).exitControl_structure(this);
-		}
 	}
 
 	public final Control_structureContext control_structure() throws RecognitionException {
@@ -756,14 +714,6 @@ public class sintaxisClassParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_conditional; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof sintaxisClassListener ) ((sintaxisClassListener)listener).enterConditional(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof sintaxisClassListener ) ((sintaxisClassListener)listener).exitConditional(this);
-		}
 	}
 
 	public final ConditionalContext conditional() throws RecognitionException {
@@ -890,14 +840,6 @@ public class sintaxisClassParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_instruccion; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof sintaxisClassListener ) ((sintaxisClassListener)listener).enterInstruccion(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof sintaxisClassListener ) ((sintaxisClassListener)listener).exitInstruccion(this);
-		}
 	}
 
 	public final InstruccionContext instruccion() throws RecognitionException {
@@ -953,14 +895,6 @@ public class sintaxisClassParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_asignacion; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof sintaxisClassListener ) ((sintaxisClassListener)listener).enterAsignacion(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof sintaxisClassListener ) ((sintaxisClassListener)listener).exitAsignacion(this);
-		}
 	}
 
 	public final AsignacionContext asignacion() throws RecognitionException {
@@ -981,14 +915,36 @@ public class sintaxisClassParser extends Parser {
 			                    // Verificar si el tipo de la expression coincide con el tipo de la variable para asignarla
 			                    if (TSLocal.containsKey((((AsignacionContext)_localctx).ID!=null?((AsignacionContext)_localctx).ID.getText():null))) {
 			                        if (TSLocal.get((((AsignacionContext)_localctx).ID!=null?((AsignacionContext)_localctx).ID.getText():null)) != ((AsignacionContext)_localctx).expresion.returnType.ordinal()) {
-			                            System.out.println("Error: No se puede asignar un tipo " + ((AsignacionContext)_localctx).expresion.returnType + " a la variable (" + (((AsignacionContext)_localctx).ID!=null?((AsignacionContext)_localctx).ID.getText():null) + ") de tipo "+SymbolType.nameOf(TSLocal.get((((AsignacionContext)_localctx).ID!=null?((AsignacionContext)_localctx).ID.getText():null))));
+			                            // System.out.println("Error: No se puede asignar un tipo " + ((AsignacionContext)_localctx).expresion.returnType + " a la variable (" + (((AsignacionContext)_localctx).ID!=null?((AsignacionContext)_localctx).ID.getText():null) + ") de tipo "+SymbolType.nameOf(TSLocal.get((((AsignacionContext)_localctx).ID!=null?((AsignacionContext)_localctx).ID.getText():null))));
+			                            // Agregamos el error de semantica al errorListener en lugar de imprimirlo
+			                            errorListener.addSemanticError(
+			                                "No se puede asignar un tipo " + ((AsignacionContext)_localctx).expresion.returnType + 
+			                                " a la variable (" + (((AsignacionContext)_localctx).ID!=null?((AsignacionContext)_localctx).ID.getText():null) + ") de tipo " +
+			                                SymbolType.nameOf(TSLocal.get((((AsignacionContext)_localctx).ID!=null?((AsignacionContext)_localctx).ID.getText():null))),
+			                                ((AsignacionContext)_localctx).ID.getLine(),
+			                                ((AsignacionContext)_localctx).ID.getCharPositionInLine()
+			                            );
 			                        }
 			                    } else if (TSGlobal.containsKey((((AsignacionContext)_localctx).ID!=null?((AsignacionContext)_localctx).ID.getText():null))) {
 			                        if (TSGlobal.get((((AsignacionContext)_localctx).ID!=null?((AsignacionContext)_localctx).ID.getText():null)) != ((AsignacionContext)_localctx).expresion.returnType.ordinal()) {
-			                            System.out.println("Error: No se puede asignar un tipo" + ((AsignacionContext)_localctx).expresion.returnType + " a la variable (" + (((AsignacionContext)_localctx).ID!=null?((AsignacionContext)_localctx).ID.getText():null) + ") de tipo " + SymbolType.nameOf(TSGlobal.get((((AsignacionContext)_localctx).ID!=null?((AsignacionContext)_localctx).ID.getText():null))));
+			                            // System.out.println("Error: No se puede asignar un tipo" + ((AsignacionContext)_localctx).expresion.returnType + " a la variable (" + (((AsignacionContext)_localctx).ID!=null?((AsignacionContext)_localctx).ID.getText():null) + ") de tipo " + SymbolType.nameOf(TSGlobal.get((((AsignacionContext)_localctx).ID!=null?((AsignacionContext)_localctx).ID.getText():null))));
+			                            // Agregamos el error de semantica al errorListener
+			                            errorListener.addSemanticError(
+			                                "No se puede asignar un tipo " + ((AsignacionContext)_localctx).expresion.returnType +
+			                                " a la variable (" + (((AsignacionContext)_localctx).ID!=null?((AsignacionContext)_localctx).ID.getText():null) + ") de tipo " +
+			                                SymbolType.nameOf(TSGlobal.get((((AsignacionContext)_localctx).ID!=null?((AsignacionContext)_localctx).ID.getText():null))),
+			                                ((AsignacionContext)_localctx).ID.getLine(),
+			                                ((AsignacionContext)_localctx).ID.getCharPositionInLine()
+			                            );
 			                        }
 			                    } else {
-			                       System.out.println("Error: La variable " + (((AsignacionContext)_localctx).ID!=null?((AsignacionContext)_localctx).ID.getText():null) + " no ha sido declarada");
+			                       // System.out.println("Error: La variable " + (((AsignacionContext)_localctx).ID!=null?((AsignacionContext)_localctx).ID.getText():null) + " no ha sido declarada");
+			                       // Agregamos el error de semantica al errorListener
+			                       errorListener.addSemanticError(
+			                            "La variable " + (((AsignacionContext)_localctx).ID!=null?((AsignacionContext)_localctx).ID.getText():null) + " no ha sido declarada",
+			                            ((AsignacionContext)_localctx).ID.getLine(),
+			                            ((AsignacionContext)_localctx).ID.getCharPositionInLine()
+			                        );
 			                    }
 			                
 			setState(142);
@@ -1029,14 +985,6 @@ public class sintaxisClassParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_declaracion; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof sintaxisClassListener ) ((sintaxisClassListener)listener).enterDeclaracion(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof sintaxisClassListener ) ((sintaxisClassListener)listener).exitDeclaracion(this);
-		}
 	}
 
 	public final DeclaracionContext declaracion() throws RecognitionException {
@@ -1052,7 +1000,8 @@ public class sintaxisClassParser extends Parser {
 			((DeclaracionContext)_localctx).id1 = match(ID);
 			 
 			                // Pushemos las variables locales al hashmap
-			                pushTSLocal((((DeclaracionContext)_localctx).id1!=null?((DeclaracionContext)_localctx).id1.getText():null), SymbolType.valueOf(((((DeclaracionContext)_localctx).tipo!=null?_input.getText(((DeclaracionContext)_localctx).tipo.start,((DeclaracionContext)_localctx).tipo.stop):null)).toUpperCase()));
+			                // Agregamos el token para obtener la linea y columna
+			                pushTSLocal((((DeclaracionContext)_localctx).id1!=null?((DeclaracionContext)_localctx).id1.getText():null), SymbolType.valueOf(((((DeclaracionContext)_localctx).tipo!=null?_input.getText(((DeclaracionContext)_localctx).tipo.start,((DeclaracionContext)_localctx).tipo.stop):null)).toUpperCase()), ((DeclaracionContext)_localctx).id1);
 			            
 			setState(149);
 			_errHandler.sync(this);
@@ -1078,7 +1027,8 @@ public class sintaxisClassParser extends Parser {
 				((DeclaracionContext)_localctx).id2 = match(ID);
 				 
 				                    // Pushemos las variables locales al hashmap
-				                    pushTSLocal((((DeclaracionContext)_localctx).id2!=null?((DeclaracionContext)_localctx).id2.getText():null), SymbolType.valueOf(((((DeclaracionContext)_localctx).tipo!=null?_input.getText(((DeclaracionContext)_localctx).tipo.start,((DeclaracionContext)_localctx).tipo.stop):null)).toUpperCase()));
+				                    // Agregamos el token para obtener la linea y columna
+				                    pushTSLocal((((DeclaracionContext)_localctx).id2!=null?((DeclaracionContext)_localctx).id2.getText():null), SymbolType.valueOf(((((DeclaracionContext)_localctx).tipo!=null?_input.getText(((DeclaracionContext)_localctx).tipo.start,((DeclaracionContext)_localctx).tipo.stop):null)).toUpperCase()), ((DeclaracionContext)_localctx).id2);
 				                
 				setState(156);
 				_errHandler.sync(this);
@@ -1129,14 +1079,6 @@ public class sintaxisClassParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_declaracion_args; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof sintaxisClassListener ) ((sintaxisClassListener)listener).enterDeclaracion_args(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof sintaxisClassListener ) ((sintaxisClassListener)listener).exitDeclaracion_args(this);
-		}
 	}
 
 	public final Declaracion_argsContext declaracion_args() throws RecognitionException {
@@ -1196,14 +1138,6 @@ public class sintaxisClassParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_expresion; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof sintaxisClassListener ) ((sintaxisClassListener)listener).enterExpresion(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof sintaxisClassListener ) ((sintaxisClassListener)listener).exitExpresion(this);
-		}
 	}
 
 	public final ExpresionContext expresion() throws RecognitionException {
@@ -1241,7 +1175,13 @@ public class sintaxisClassParser extends Parser {
 				                                            //System.out.println("Expression: "+(((ExpresionContext)_localctx).m2!=null?_input.getText(((ExpresionContext)_localctx).m2.start,((ExpresionContext)_localctx).m2.stop):null) + " type: "+((ExpresionContext)_localctx).m2.returnType);
 				                                            if (((ExpresionContext)_localctx).m2.returnType != ((ExpresionContext)_localctx).m1.returnType) {
 				                                                ((ExpresionContext)_localctx).returnType =  SymbolType.ERROR_TYPE;
-				                                                System.out.println("Error: Tipos de datos incompatibles");
+				                                                // System.out.println("Error: Tipos de datos incompatibles");
+				                                                // Agregamos el error de semantica al errorListener
+				                                                errorListener.addSemanticError(
+				                                                    "Tipos de datos incompatibles",
+				                                                    (((ExpresionContext)_localctx).m2!=null?(((ExpresionContext)_localctx).m2.start):null).getLine(),            // El primer token de la subregla
+				                                                    (((ExpresionContext)_localctx).m2!=null?(((ExpresionContext)_localctx).m2.start):null).getCharPositionInLine()
+				                                                );
 				                                            }
 				                                        
 				}
@@ -1278,14 +1218,6 @@ public class sintaxisClassParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_multExp; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof sintaxisClassListener ) ((sintaxisClassListener)listener).enterMultExp(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof sintaxisClassListener ) ((sintaxisClassListener)listener).exitMultExp(this);
-		}
 	}
 
 	public final MultExpContext multExp() throws RecognitionException {
@@ -1321,7 +1253,13 @@ public class sintaxisClassParser extends Parser {
 				 
 				                                        if (((MultExpContext)_localctx).a2.returnType != ((MultExpContext)_localctx).a1.returnType) {
 				                                            ((MultExpContext)_localctx).returnType =  SymbolType.ERROR_TYPE;
-				                                            System.out.println("Error: Tipos de datos incompatibles");
+				                                            // System.out.println("Error: Tipos de datos incompatibles");
+				                                            // Agregamos el error de semantica al errorListener
+				                                            errorListener.addSemanticError(
+				                                                "Tipos de datos incompatibles",
+				                                                (((MultExpContext)_localctx).a2!=null?(((MultExpContext)_localctx).a2.start):null).getLine(),
+				                                                (((MultExpContext)_localctx).a2!=null?(((MultExpContext)_localctx).a2.start):null).getCharPositionInLine()
+				                                            );
 				                                        }
 				                                     
 				}
@@ -1358,14 +1296,6 @@ public class sintaxisClassParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_atomExp; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof sintaxisClassListener ) ((sintaxisClassListener)listener).enterAtomExp(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof sintaxisClassListener ) ((sintaxisClassListener)listener).exitAtomExp(this);
-		}
 	}
 
 	public final AtomExpContext atomExp() throws RecognitionException {
@@ -1399,7 +1329,15 @@ public class sintaxisClassParser extends Parser {
 				 
 				                                // Verify if the symbol is declared
 				                                if (!TSLocal.containsKey((((AtomExpContext)_localctx).ID!=null?((AtomExpContext)_localctx).ID.getText():null)) && !TSGlobal.containsKey((((AtomExpContext)_localctx).ID!=null?((AtomExpContext)_localctx).ID.getText():null))) {
-				                                    System.out.println("Error: La variable "+(((AtomExpContext)_localctx).ID!=null?((AtomExpContext)_localctx).ID.getText():null)+" no ha sido declarada");
+				                                    // System.out.println("Error: La variable "+(((AtomExpContext)_localctx).ID!=null?((AtomExpContext)_localctx).ID.getText():null)+" no ha sido declarada");
+				                                    errorListener.addSemanticError(
+				                                        "La variable '" + (((AtomExpContext)_localctx).ID!=null?((AtomExpContext)_localctx).ID.getText():null) + "' no ha sido declarada",
+				                                        ((AtomExpContext)_localctx).ID.getLine(),
+				                                        ((AtomExpContext)_localctx).ID.getCharPositionInLine()
+				                                    );
+				                                    // Marcamos el tipo de la variable como error
+				                                    ((AtomExpContext)_localctx).returnType =  SymbolType.ERROR_TYPE;
+
 				                                }
 
 				                                // Verify if the symbol is declared on the local symbols
@@ -1456,14 +1394,6 @@ public class sintaxisClassParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_comparacion; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof sintaxisClassListener ) ((sintaxisClassListener)listener).enterComparacion(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof sintaxisClassListener ) ((sintaxisClassListener)listener).exitComparacion(this);
-		}
 	}
 
 	public final ComparacionContext comparacion() throws RecognitionException {

@@ -13,6 +13,11 @@ public class Test {
         sintaxisClassLexer lexer = new sintaxisClassLexer(input);
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         sintaxisClassParser parser = new sintaxisClassParser(tokens);
+
+        // Add custom error listener
+        parser.removeErrorListeners();
+        parser.addErrorListener(new CustomErrorListener());
+
         parser.program();
 
     }
