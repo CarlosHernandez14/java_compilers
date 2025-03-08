@@ -1,6 +1,7 @@
 // Generated from c:/Users/carlo/Documents/CompilersAntlr/java_compilers/java_ide_grammatic/src/sintaxisClass.g by ANTLR 4.13.1
 
     import java.util.HashMap;
+    import org.antlr.v4.runtime.Token; // Para acceder a getLine(), getCharPositionInLine()
 
 import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.CharStream;
@@ -96,6 +97,15 @@ public class sintaxisClassLexer extends Lexer {
 
 
 	    // Variables globales
+
+	    // Custom error listener  que vamos a inyectar desde App.java por medio del setter
+	    public CustomErrorListener errorListener;
+
+	    // Por comodidad, un método setter
+	    public void setCustomErrorListener(CustomErrorListener listener) {
+	        this.errorListener = listener;
+	    }
+
 
 	    // Hashmap of TSGlobal symbols
 	    HashMap<String, Integer> TSGlobal = new HashMap<String, Integer>();

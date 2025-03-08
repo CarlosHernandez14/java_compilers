@@ -2,11 +2,21 @@ grammar sintaxisClass;
 
 @header{
     import java.util.HashMap;
+    import org.antlr.v4.runtime.Token; // Para acceder a getLine(), getCharPositionInLine()
 }
 
 @members{
 
     // Variables globales
+
+    // Custom error listener  que vamos a inyectar desde App.java por medio del setter
+    public CustomErrorListener errorListener;
+
+    // Por comodidad, un método setter
+    public void setCustomErrorListener(CustomErrorListener listener) {
+        this.errorListener = listener;
+    }
+
 
     // Hashmap of TSGlobal symbols
     HashMap<String, Integer> TSGlobal = new HashMap<String, Integer>();
