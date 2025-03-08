@@ -1,0 +1,7 @@
+[
+  {
+    "line": 25,
+    "charPositionInLine": 0,
+    "msg": "extraneous input \u0027\u003cEOF\u003e\u0027 expecting {\u0027}\u0027, \u0027int\u0027, \u0027double\u0027, \u0027char\u0027, \u0027String\u0027, \u0027boolean\u0027, \u0027public\u0027, \u0027private\u0027, \u0027protected\u0027}"
+  }
+]
