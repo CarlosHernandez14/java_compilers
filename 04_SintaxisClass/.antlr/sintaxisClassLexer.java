@@ -1,4 +1,4 @@
-// Generated from c:/Users/carlo/Documents/LenguajesAutomatasJava/04_SintaxisClass/sintaxisClass.g by ANTLR 4.13.1
+// Generated from c:/Users/carlo/Documents/CompilersAntlr/java_compilers/04_SintaxisClass/sintaxisClass.g by ANTLR 4.13.1
 
     import java.util.HashMap;
 
