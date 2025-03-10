@@ -79,12 +79,92 @@ class_ : modificAcceso? 'class' ID {
 
 // Reglas sintácticas
 member  :  property | metodo ;
-property: modificAcceso? tipo ID ('=' expresion)? (',' ID ('=' expresion)?)* SEMICOLON { 
-                // Pushemos las variables globales al hashmap
-                // Posible error cause the modifAcces are typen on LowerCase
-                // Agregamos el toekn para obtener la linea y columna
-                pushTSGlobal($ID.text, SymbolType.valueOf(($tipo.text).toUpperCase()), $ID);
-            } ;
+property: modificAcceso? tipo 
+                        id1=ID { 
+                            // Pushemos las variables locales al hashmap
+                            pushTSGlobal($id1.text, SymbolType.valueOf(($tipo.text).toUpperCase()), $id1);
+                        } ('=' 
+                            expresion { 
+                                //System.out.println("Expression: "+$expresion.text + " type: "+$expresion.returnType);
+                                if ($expresion.text.length() <= 0) {
+                                    errorListener.addSemanticError(
+                                        "Error: Falta asignar expression" +
+                                        " a la variable (" + $id1.text + ") de tipo " +
+                                        SymbolType.nameOf(TSLocal.get($id1.text)),
+                                        $id1.getLine(),
+                                        $id1.getCharPositionInLine()
+                                    );
+                                    throw new RecognitionException("Errror: Falta asignar expression a la variable" + $id1.text, null, _input, _localctx);
+                                }
+
+                                // Verificar si el tipo de la expression coincide con el tipo de la variable para asignarla
+                                if (TSGlobal.containsKey($id1.text)) {
+                                    if (TSGlobal.get($id1.text) != $expresion.returnType.ordinal()) {
+                                        // System.out.println("Error: No se puede asignar un tipo" + $expresion.returnType + " a la variable (" + $id1.text + ") de tipo " + SymbolType.nameOf(TSGlobal.get($id1.text)));
+                                        // Agregamos el error de semantica al errorListener
+                                        errorListener.addSemanticError(
+                                            "No se puede asignar un tipo " + $expresion.returnType +
+                                            " a la variable (" + $id1.text + ") de tipo " +
+                                            SymbolType.nameOf(TSGlobal.get($id1.text)),
+                                            $id1.getLine(),
+                                            $id1.getCharPositionInLine()
+                                        );
+                                    }
+                                } else {
+                                    // System.out.println("Error: La variable " + $id1.text + " no ha sido declarada");
+                                    // Agregamos el error de semantica al errorListener
+                                    errorListener.addSemanticError(
+                                        "La variable " + $id1.text + " no ha sido declarada",
+                                        $id1.getLine(),
+                                        $id1.getCharPositionInLine()
+                                    );
+                                }
+                            } 
+                        )? 
+                        (
+                            ',' 
+                            id2=ID { 
+                                // Pushemos las variables locales al hashmap
+                                pushTSGlobal($id2.text, SymbolType.valueOf(($tipo.text).toUpperCase()), $id2);                                
+                            } ('=' 
+                                expresion { 
+                                    //System.out.println("Expression: "+$expresion.text + " type: "+$expresion.returnType);
+                                    if ($expresion.text.length() <= 0) {
+                                        errorListener.addSemanticError(
+                                            "Error: Falta asignar expression" +
+                                            " a la variable (" + $id2.text + ") de tipo " +
+                                            SymbolType.nameOf(TSLocal.get($id2.text)),
+                                            $id2.getLine(),
+                                            $id2.getCharPositionInLine()
+                                        );
+                                        throw new RecognitionException("Errror: Falta asignar expression a la variable" + $id2.text, null, _input, _localctx);
+                                    }
+
+                                    // Verificar si el tipo de la expression coincide con el tipo de la variable para asignarla
+                                    if (TSGlobal.containsKey($id2.text)) {
+                                        if (TSGlobal.get($id2.text) != $expresion.returnType.ordinal()) {
+                                            // System.out.println("Error: No se puede asignar un tipo" + $expresion.returnType + " a la variable (" + $id2.text + ") de tipo " + SymbolType.nameOf(TSGlobal.get($id2.text)));
+                                            // Agregamos el error de semantica al errorListener
+                                            errorListener.addSemanticError(
+                                                "No se puede asignar un tipo " + $expresion.returnType +
+                                                " a la variable (" + $id2.text + ") de tipo " +
+                                                SymbolType.nameOf(TSGlobal.get($id2.text)),
+                                                $id2.getLine(),
+                                                $id2.getCharPositionInLine()
+                                            );
+                                        }
+                                    } else {
+                                        // System.out.println("Error: La variable " + $id2.text + " no ha sido declarada");
+                                        // Agregamos el error de semantica al errorListener
+                                        errorListener.addSemanticError(
+                                            "La variable " + $id2.text + " no ha sido declarada",
+                                            $id2.getLine(),
+                                            $id2.getCharPositionInLine()
+                                        );
+                                    }
+                                }
+                            )?
+                        )* SEMICOLON;
 
 metodo  : modificAcceso? returnTypeMethods ID { 
                     // Push the method name to global symbols
@@ -118,10 +198,10 @@ asignacion: ID '=' expresion {
                     //System.out.println("Expression: "+$expresion.text + " type: "+$expresion.returnType);
 
                     if ($expresion.text.length() <= 0) {
+                        SymbolType type = TSLocal.containsKey($ID.text) ? SymbolType.nameOf(TSLocal.get($ID.text)) : SymbolType.nameOf(TSGlobal.get($ID.text));
                         errorListener.addSemanticError(
                             "Error: Falta asignar expression" +
-                            " a la variable (" + $ID.text + ") de tipo " +
-                            SymbolType.nameOf(TSLocal.get($ID.text)),
+                            " a la variable (" + $ID.text + ") de tipo " + type,
                             $ID.getLine(),
                             $ID.getCharPositionInLine()
                         );
