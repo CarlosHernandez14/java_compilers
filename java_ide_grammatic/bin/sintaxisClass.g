@@ -248,14 +248,40 @@ declaracion: tipo
                 // Pushemos las variables locales al hashmap
                 // Agregamos el token para obtener la linea y columna
                 pushTSLocal($id1.text, SymbolType.valueOf(($tipo.text).toUpperCase()), $id1);
-            } ('=' expresion)? 
+            } ('=' 
+                expr1=expresion { 
+                    //  Verificar si el tipo de la expression coincide con el tipo de la variable para asignarla
+                    if ($expr1.returnType != SymbolType.nameOf(TSLocal.get($id1.text))) {
+                        // System.out.println("Error: Tipos de datos incompatibles");
+                        // Agregamos el error de semantica al errorListener
+                        errorListener.addSemanticError(
+                            "Tipos de datos incompatibles, no puedes asignar el tipo (" + $expr1.returnType + ") a la variable " + $id1.text + " de tipo " + SymbolType.nameOf(TSLocal.get($id1.text)),
+                            $expr1.start.getLine(),            // El primer token de la subregla
+                            $expr1.start.getCharPositionInLine()
+                        );
+                    }
+                }
+            )? 
             (
                 ',' 
                 id2=ID { 
                     // Pushemos las variables locales al hashmap
                     // Agregamos el token para obtener la linea y columna
                     pushTSLocal($id2.text, SymbolType.valueOf(($tipo.text).toUpperCase()), $id2);
-                } ('=' expresion)?
+                } ('=' 
+                    expr2=expresion { 
+                        //  Verificar si el tipo de la expression coincide con el tipo de la variable para asignarla
+                        if ($expr2.returnType != SymbolType.nameOf(TSLocal.get($id2.text))) {
+                            // System.out.println("Error: Tipos de datos incompatibles");
+                            // Agregamos el error de semantica al errorListener
+                            errorListener.addSemanticError(
+                                "Tipos de datos incompatibles, no puedes asignar el tipo (" + $expr2.returnType + ") a la variable " + $id2.text + " de tipo " + SymbolType.nameOf(TSLocal.get($id2.text)),
+                                $expr2.start.getLine(),            // El primer token de la subregla
+                                $expr2.start.getCharPositionInLine()
+                            );
+                        }
+                    }
+                )?
             )* SEMICOLON ;
 declaracion_args: tipo idArg1=ID { 
                         // Pusheamos los parametros del metodo a variables locales
