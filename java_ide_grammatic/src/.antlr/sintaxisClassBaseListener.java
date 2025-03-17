@@ -1,4 +1,4 @@
-// Generated from c:/Users/carlo/Documents/CompilersAntlr/java_compilers/java_ide_grammatic/src/sintaxisClass.g by ANTLR 4.13.1
+// Generated from c:/Users/carlo/Documents/LenguajesAutomatasJava/java_ide_grammatic/src/sintaxisClass.g by ANTLR 4.13.1
 
     import java.util.HashMap;
     import org.antlr.v4.runtime.Token; // Para acceder a getLine(), getCharPositionInLine()
@@ -99,6 +99,30 @@ public class sintaxisClassBaseListener implements sintaxisClassListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitTipo(sintaxisClassParser.TipoContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterReturnTypeMethods(sintaxisClassParser.ReturnTypeMethodsContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitReturnTypeMethods(sintaxisClassParser.ReturnTypeMethodsContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterReturnExpMethods(sintaxisClassParser.ReturnExpMethodsContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitReturnExpMethods(sintaxisClassParser.ReturnExpMethodsContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

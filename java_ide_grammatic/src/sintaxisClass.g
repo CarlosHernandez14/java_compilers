@@ -3,6 +3,7 @@ grammar sintaxisClass;
 @header{
     import java.util.HashMap;
     import org.antlr.v4.runtime.Token; // Para acceder a getLine(), getCharPositionInLine()
+    
 }
 
 @members{
@@ -75,7 +76,10 @@ class_ : modificAcceso? 'class' ID {
         }
         '{' 
             member*
-        '}' ;
+        '}' { 
+            // Limpiar tabla global de simbolos excepto los tipo class
+            TSGlobal.entrySet().removeIf(entry -> entry.getValue() != SymbolType.CLASS.ordinal());
+         } ;
 
 // Reglas sintácticas
 member  :  property | metodo ;

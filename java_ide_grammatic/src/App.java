@@ -9,6 +9,7 @@ public class App {
 
     public static void main(String[] args) throws Exception {
 
+        int x;
         // Obtenemos el primer argumento que se le pase al programa
         String filePath = args[0];
         // Convertimos el archivo que se paso como argumento a un CharStream

@@ -1,4 +1,4 @@
-// Generated from c:/Users/carlo/Documents/CompilersAntlr/java_compilers/java_ide_grammatic/src/sintaxisClass.g by ANTLR 4.13.1
+// Generated from c:/Users/carlo/Documents/LenguajesAutomatasJava/java_ide_grammatic/src/sintaxisClass.g by ANTLR 4.13.1
 
     import java.util.HashMap;
     import org.antlr.v4.runtime.Token; // Para acceder a getLine(), getCharPositionInLine()
@@ -80,6 +80,26 @@ public interface sintaxisClassListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitTipo(sintaxisClassParser.TipoContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link sintaxisClassParser#returnTypeMethods}.
+	 * @param ctx the parse tree
+	 */
+	void enterReturnTypeMethods(sintaxisClassParser.ReturnTypeMethodsContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link sintaxisClassParser#returnTypeMethods}.
+	 * @param ctx the parse tree
+	 */
+	void exitReturnTypeMethods(sintaxisClassParser.ReturnTypeMethodsContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link sintaxisClassParser#returnExpMethods}.
+	 * @param ctx the parse tree
+	 */
+	void enterReturnExpMethods(sintaxisClassParser.ReturnExpMethodsContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link sintaxisClassParser#returnExpMethods}.
+	 * @param ctx the parse tree
+	 */
+	void exitReturnExpMethods(sintaxisClassParser.ReturnExpMethodsContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link sintaxisClassParser#control_structure}.
 	 * @param ctx the parse tree
