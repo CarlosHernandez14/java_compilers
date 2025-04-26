@@ -2,6 +2,8 @@ grammar sintaxisClass;
 
 @header{
     import java.util.HashMap;
+    import java.util.ArrayList;
+    import java.util.List;
     import org.antlr.v4.runtime.Token; // Para acceder a getLine(), getCharPositionInLine()
     
 }

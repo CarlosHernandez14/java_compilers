@@ -14,7 +14,7 @@ public class TestClass{
     public void metodCall() {
         double numDouble = 5.0;
         int numero = 10;
-        metodo1(numero, numDouble);
+        metodo1(numDouble, numDouble);
     }
 
 }
