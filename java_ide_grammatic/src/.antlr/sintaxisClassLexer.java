@@ -1,4 +1,4 @@
-// Generated from c:/Users/carlo/Documents/LenguajesAutomatasJava/java_ide_grammatic/src/sintaxisClass.g by ANTLR 4.13.1
+// Generated from c:/Users/carlo/Documents/CompilersAntlr/java_compilers/java_ide_grammatic/src/sintaxisClass.g by ANTLR 4.13.1
 
     import java.util.HashMap;
     import org.antlr.v4.runtime.Token; // Para acceder a getLine(), getCharPositionInLine()
@@ -113,6 +113,10 @@ public class sintaxisClassLexer extends Lexer {
 	    // TSLocal symbols
 	    HashMap<String, Integer> TSLocal = new HashMap<String, Integer>();
 
+	    // Hashmap to store the method calls Name: 
+	    HashMap<String, MethodCallInfo> methodCalls = new HashMap<String, MethodCallInfo>();
+	    private String currentMethodName;
+
 	    // Method to insert on the symbols hasmap and verify if it is already declared
 	    public void pushTSGlobal(String id, SymbolType type, Token token) {
 	        // Verify if the symbol is already declared
@@ -155,6 +159,18 @@ public class sintaxisClassLexer extends Lexer {
 	            return values[ordinal];
 	        }
 	    }
+
+	    // Class for method call info
+	    public class MethodCallInfo {
+	        ArrayList<SymbolType> args;
+	        int numCalls;
+
+	        public MethodCallInfo() {
+	            this.args = new ArrayList<SymbolType>();
+	            this.numCalls = 0;
+	        }
+	    }
+
 
 
 	public sintaxisClassLexer(CharStream input) {

@@ -24,6 +24,10 @@ grammar sintaxisClass;
     // TSLocal symbols
     HashMap<String, Integer> TSLocal = new HashMap<String, Integer>();
 
+    // Hashmap to store the method calls Name: 
+    HashMap<String, MethodCallInfo> methodCalls = new HashMap<String, MethodCallInfo>();
+    private String currentMethodName;
+
     // Method to insert on the symbols hasmap and verify if it is already declared
     public void pushTSGlobal(String id, SymbolType type, Token token) {
         // Verify if the symbol is already declared
@@ -66,6 +70,18 @@ grammar sintaxisClass;
             return values[ordinal];
         }
     }
+
+    // Class for method call info
+    public class MethodCallInfo {
+        ArrayList<SymbolType> args;
+        int numCalls;
+
+        public MethodCallInfo() {
+            this.args = new ArrayList<SymbolType>();
+            this.numCalls = 0;
+        }
+    }
+
 }       
 
 program  : class_+  ;
@@ -170,11 +186,26 @@ property: modificAcceso? tipo
                             )?
                         )* SEMICOLON;
 
-metodo  : modificAcceso? returnTypeMethods ID { 
-                    // Push the method name to global symbols
-                    // Agrergamos el token para obtener la linea y columna
-                    pushTSGlobal($ID.text, SymbolType.METHOD, $ID);
-                } '(' declaracion_args? ')'
+metodo  : modificAcceso? returnTypeMethods name=ID { 
+                    
+                    // Guardamos el nombre actual
+                    currentMethodName = $name.text;
+
+                    // Push global y registro en methodCalls
+                    pushTSGlobal(currentMethodName, SymbolType.METHOD, $name);
+                    if (methodCalls.containsKey(currentMethodName)) {
+                        errorListener.addSemanticError(
+                            "El método '" + currentMethodName + "' ya ha sido declarado",
+                            $name.getLine(),
+                            $name.getCharPositionInLine()
+                        );
+                    } else {
+                        methodCalls.put(currentMethodName, new MethodCallInfo());
+                    }
+
+                } '(' 
+                        declaracion_args? 
+                    ')'
                '{'
                     (instruccion | control_structure)*
                '}' { 
@@ -197,7 +228,58 @@ conditional: IF '(' comparacion ')' '{'
                 (instruccion | control_structure)*
             '}')? ;
 
-instruccion: asignacion  | declaracion ;
+instruccion: asignacion  | declaracion | method_call ;
+method_call: ID '(' exprs+=expresion? (',' exprs+=expresion)* ')' SEMICOLON { 
+                    
+                    // Verificar si el metodo existe en la tabla de simbolos global y es de tipo metodo
+                    if (!TSGlobal.containsKey($ID.text) && TSGlobal.get($ID.text) != SymbolType.METHOD.ordinal()) {
+                        // System.out.println("Error: El metodo " + $ID.text + " no ha sido declarado");
+                        // Agregamos el error de semantica al errorListener
+                        errorListener.addSemanticError(
+                            "El metodo '" + $ID.text + "' no ha sido declarado",
+                            $ID.getLine(),
+                            $ID.getCharPositionInLine()
+                        );
+                    } else {
+                        // Verificar si el metodo tiene los mismos argumentos que la llamada
+                        if (methodCalls.containsKey($ID.text)) {
+                            MethodCallInfo methodCallInfo = methodCalls.get($ID.text);
+                            if (methodCallInfo.args.size() != $exprs.size()) {
+                                // System.out.println("Error: El metodo " + $ID.text + " no tiene el mismo numero de argumentos que la llamada");
+                                // Agregamos el error de semantica al errorListener
+                                errorListener.addSemanticError(
+                                    "El metodo '" + $ID.text + "' no tiene el mismo numero de argumentos que la llamada",
+                                    $ID.getLine(),
+                                    $ID.getCharPositionInLine()
+                                );
+                            } else {
+                                for (int i = 0; i < methodCallInfo.args.size(); i++) {
+                                    if (methodCallInfo.args.get(i) != $exprs.get(i).returnType) {
+                                        // System.out.println("Error: El tipo de argumento " + i + " no coincide con el tipo del metodo " + $ID.text);
+                                        // Agregamos el error de semantica al errorListener
+                                        errorListener.addSemanticError(
+                                            "El tipo de argumento " + i + " no coincide con el tipo del metodo '" + $ID.text + "'",
+                                            $ID.getLine(),
+                                            $ID.getCharPositionInLine()
+                                        );
+                                    }
+                                }
+                                // Incrementar el contador de llamadas al metodo
+                                methodCallInfo.numCalls++;
+                                methodCalls.put($ID.text, methodCallInfo);
+                            }
+                        } else {
+                            // System.out.println("Error: El metodo " + $ID.text + " no ha sido declarado");
+                            // Agregamos el error de semantica al errorListener
+                            errorListener.addSemanticError(
+                                "El metodo '" + $ID.text + "' no ha sido declarado",
+                                $ID.getLine(),
+                                $ID.getCharPositionInLine()
+                            );
+                        }
+                    }
+                    
+                } ;
 asignacion: ID '=' expresion { 
                     //System.out.println("Expression: "+$expresion.text + " type: "+$expresion.returnType);
 
@@ -290,10 +372,16 @@ declaracion: tipo
 declaracion_args: tipo idArg1=ID { 
                         // Pusheamos los parametros del metodo a variables locales
                         pushTSLocal($idArg1.text, SymbolType.valueOf(($tipo.text).toUpperCase()), $idArg1);
+
+                        MethodCallInfo info = methodCalls.get(currentMethodName);
+                        info.args.add(SymbolType.valueOf($tipo.text.toUpperCase()));
+
                     } (
                         ',' tipo idArg2=ID { 
                             // Pusheamos el segunto parametro si es que lo hay a TSLocal
                             pushTSLocal($idArg2.text, SymbolType.valueOf(($tipo.text).toUpperCase()), $idArg2);
+                            MethodCallInfo infoCall = methodCalls.get(currentMethodName);
+                            infoCall.args.add(SymbolType.valueOf($tipo.text.toUpperCase()));
                         }
                     )* ;
 

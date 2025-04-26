@@ -16,7 +16,7 @@ public class App {
             filePath = args[0];
         } catch (Exception e) {
             // En caso de que no encuentre la ruta en los args cargar por defecto una
-            filePath = "C:/Users/carlo/Documents/PruebaGramaticaExamen.java";
+            filePath = "C:/Users/carlo/Documents/CompilersAntlr/java_compilers/java_ide_grammatic/TestClass.java";
         }
 
         // Convertimos el archivo que se paso como argumento a un CharStream
