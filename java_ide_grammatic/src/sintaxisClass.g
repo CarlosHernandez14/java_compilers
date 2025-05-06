@@ -144,7 +144,7 @@ class_ : modificAcceso? 'class' ID {
          } ;
 
 // Reglas sintácticas
-member  :  property | metodo ;
+member  :  property | metodo | metodo_main ;
 property: modificAcceso? tipo 
                         id1=ID { 
                             // Pushemos las variables locales al hashmap
@@ -262,7 +262,27 @@ metodo  : modificAcceso? returnTypeMethods name=ID {
                '}' { 
                     // Clear the local symbols
                     TSLocal.clear();
-               } ;                 
+               } ;    
+
+metodo_main : 'public' 'static' 'void' 'main' '(' 'String' '[' ']' ID ')' '{'
+        {
+            // Validamos si ya existe un método main en TSGlobal
+            if (TSGlobal.containsKey("main")) {
+                errorListener.addSemanticError(
+                    "El método 'main' ya está declarado en esta clase.",
+                    $ID.getLine(),
+                    $ID.getCharPositionInLine()
+                );
+            } else {
+                // Si no está declarado, lo agregamos a TSGlobal
+                pushTSGlobal("main", SymbolType.METHOD, $ID);
+                methodCalls.put("main", new MethodCallInfo());
+            }
+        }
+        (instruccion | control_structure)*
+      '}'
+    ;
+
 
 modificAcceso: PUBLIC | PRIVATE | PROTECTED ;
 tipo         : INT    | DOUBLE  | CHAR | STRING | BOOLEAN ;
