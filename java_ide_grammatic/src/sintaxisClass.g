@@ -112,7 +112,7 @@ grammar sintaxisClass;
                 errorListener.errors.add(new CustomErrorListener.CompilerError(
                     metodo.line,
                     metodo.column,
-                    "SemanticError",
+                    "SemanticWarning",
                     "El metodo '" + metodo.name + "' nunca es llamado.",
                     "WARNING"
                 ));
@@ -120,7 +120,7 @@ grammar sintaxisClass;
                 errorListener.errors.add(new CustomErrorListener.CompilerError(
                     metodo.line,
                     metodo.column,
-                    "SemanticError",
+                    "SemanticWarning",
                     "El metodo '" + metodo.name + "' se llama solo una vez. Considera inyectar su logica directamente.",
                     "WARNING"
                 ));
