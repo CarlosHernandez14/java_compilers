@@ -4,6 +4,8 @@ grammar sintaxisClass;
     import java.util.HashMap;
     import java.util.ArrayList;
     import java.util.List;
+    import java.util.*;
+    import java.util.stream.Collectors;
     import org.antlr.v4.runtime.Token; // Para acceder a getLine(), getCharPositionInLine()
     
 }
@@ -81,6 +83,48 @@ grammar sintaxisClass;
         public MethodCallInfo() {
             this.args = new ArrayList<SymbolType>();
             this.numCalls = 0;
+        }
+    }
+
+    // Lista para almacenar métodos definidos con su ubicación
+    ArrayList<MethodDef> definedMethods = new ArrayList<>();
+
+    public class MethodDef {
+        String name;
+        int line;
+        int column;
+
+        public MethodDef(String name, int line, int column) {
+            this.name = name;
+            this.line = line;
+            this.column = column;
+        }
+    }
+
+
+    // Metodo para generar Warnings, detectar los casos en que se llaman 0 veces o 1 vez
+    public void generarWarningsMetodos() {
+        for (MethodDef metodo : definedMethods) {
+            MethodCallInfo llamada = methodCalls.get(metodo.name);
+            int numLlamadas = (llamada != null) ? llamada.numCalls : 0;
+
+            if (numLlamadas == 0) {
+                errorListener.errors.add(new CustomErrorListener.CompilerError(
+                    metodo.line,
+                    metodo.column,
+                    "SemanticError",
+                    "El metodo '" + metodo.name + "' nunca es llamado.",
+                    "WARNING"
+                ));
+            } else if (numLlamadas == 1) {
+                errorListener.errors.add(new CustomErrorListener.CompilerError(
+                    metodo.line,
+                    metodo.column,
+                    "SemanticError",
+                    "El metodo '" + metodo.name + "' se llama solo una vez. Considera inyectar su logica directamente.",
+                    "WARNING"
+                ));
+            }
         }
     }
 
@@ -193,17 +237,22 @@ metodo  : modificAcceso? returnTypeMethods name=ID {
                     // Guardamos el nombre actual
                     currentMethodName = $name.text;
 
-                    // Push global y registro en methodCalls
-                    pushTSGlobal(currentMethodName, SymbolType.METHOD, $name);
-                    if (methodCalls.containsKey(currentMethodName)) {
+                    
+                    // Validar si ya esta declarado
+                    if (TSGlobal.containsKey(currentMethodName)) { 
                         errorListener.addSemanticError(
                             "El método '" + currentMethodName + "' ya ha sido declarado",
                             $name.getLine(),
                             $name.getCharPositionInLine()
                         );
                     } else {
+                        // Solo si no está, lo registramos como método
+                        pushTSGlobal(currentMethodName, SymbolType.METHOD, $name);
                         methodCalls.put(currentMethodName, new MethodCallInfo());
-                    }
+
+                        // Guardamos su ubicación para warnings al final
+                        definedMethods.add(new MethodDef(currentMethodName, $name.getLine(), $name.getCharPositionInLine()));
+                    }                    
 
                 } '(' 
                         declaracion_args? 
@@ -234,7 +283,7 @@ instruccion: asignacion  | declaracion | method_call ;
 method_call: ID '(' exprs+=expresion? (',' exprs+=expresion)* ')' SEMICOLON { 
                     
                     // Verificar si el metodo existe en la tabla de simbolos global y es de tipo metodo
-                    if (!TSGlobal.containsKey($ID.text) && TSGlobal.get($ID.text) != SymbolType.METHOD.ordinal()) {
+                    if (!TSGlobal.containsKey($ID.text) || TSGlobal.get($ID.text) != SymbolType.METHOD.ordinal()) {
                         // System.out.println("Error: El metodo " + $ID.text + " no ha sido declarado");
                         // Agregamos el error de semantica al errorListener
                         errorListener.addSemanticError(

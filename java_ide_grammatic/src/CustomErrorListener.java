@@ -8,7 +8,7 @@ import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
 
 public class CustomErrorListener extends BaseErrorListener {
-    private ArrayList<CompilerError> errors = new ArrayList<>();
+    public ArrayList<CompilerError> errors = new ArrayList<>();
 
     @Override
     public void syntaxError(Recognizer<?, ?> recognizer, 
@@ -55,12 +55,19 @@ public class CustomErrorListener extends BaseErrorListener {
         int column;
         String type;    // "SyntaxError" o "SemanticError"
         String message;
+        String severity;
 
-        public CompilerError(int line, int column, String type, String message) {
+        public CompilerError(int line, int column, String type, String message, String severity) {
             this.line = line;
             this.column = column;
             this.type = type;
             this.message = message;
+            this.severity = severity; // "ERROR" o "WARNING"
+        }
+
+        // Constructor por defecto para error
+        public CompilerError(int line, int column, String type, String message) {
+            this(line, column, type, message, "ERROR");
         }
     }
 }

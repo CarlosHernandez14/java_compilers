@@ -37,6 +37,9 @@ public class App {
 
         parser.program();
 
+        // Analiza las llamadas vs definiciones
+        parser.generarWarningsMetodos();
+
         String jsonErrors = errorListener.getErrorsAsJson();
         System.out.println(jsonErrors);
 
