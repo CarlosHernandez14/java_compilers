@@ -32,6 +32,10 @@ public class CustomErrorListener extends BaseErrorListener {
         errors.add(new CompilerError(line, column, "SemanticError", message));
     }
 
+    public void addOptimizationHint(String message, int line, int column) {
+        errors.add(new CompilerError(line, column, "OptimizationHint", message, "HINT"));
+    }
+
     public void saveErrorsToJson(String fileName) {
         Gson gson = new Gson();
         try (FileWriter writer = new FileWriter(fileName)) {

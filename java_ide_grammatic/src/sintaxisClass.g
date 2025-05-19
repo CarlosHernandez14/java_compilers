@@ -32,6 +32,9 @@ grammar sintaxisClass;
     HashMap<String, MethodCallInfo> methodCalls = new HashMap<String, MethodCallInfo>();
     private String currentMethodName;
 
+    // Hashmap para el BTA
+    HashMap<String, Integer> tablaBindingTime = new HashMap<String, Integer>();
+
     // Method to insert on the symbols hasmap and verify if it is already declared
     public void pushTSGlobal(String id, SymbolType type, Token token) {
         // Verify if the symbol is already declared
@@ -399,6 +402,17 @@ asignacion: ID '=' expresion {
                             $ID.getCharPositionInLine()
                         );
                     }
+
+                    if ($expresion.esReducible) { 
+                        tablaBindingTime.put($ID.text, 1); // Variable estatica
+                        errorListener.addOptimizationHint(
+                            "Expresion reducible. Variable '" + $ID.text + "' es estatica",
+                            $ID.getLine(),
+                            $ID.getCharPositionInLine()
+                        );
+                    } else {
+                        tablaBindingTime.put($ID.text, 0); // Variable es dinamica
+                    }
                 } SEMICOLON ;
 declaracion: tipo 
             id1=ID { 
@@ -456,8 +470,9 @@ declaracion_args: tipo idArg1=ID {
                         }
                     )* ;
 
-expresion returns [SymbolType returnType] :  m1=multExp { 
+expresion returns [SymbolType returnType, boolean esReducible] :  m1=multExp { 
                                         $returnType=$m1.returnType;
+                                        $esReducible=$m1.esReducible;
                                         //System.out.println("Expression: "+$m1.text + " type: "+$m1.returnType);
                                     }
                                     (
@@ -474,10 +489,12 @@ expresion returns [SymbolType returnType] :  m1=multExp {
                                                     $m2.start.getCharPositionInLine()
                                                 );
                                             }
+                                            $esReducible = $esReducible && $m2.esReducible;
                                         } 
                                     )* ;
-multExp   returns [SymbolType returnType] :  a1=atomExp { 
+multExp   returns [SymbolType returnType, boolean esReducible] :  a1=atomExp { 
                                         $returnType=$a1.returnType;
+                                        $esReducible = $a1.esReducible;
                                     }    
                                     (('*' | '/') a2=atomExp { 
                                         if ($a2.returnType != $a1.returnType) {
@@ -490,10 +507,18 @@ multExp   returns [SymbolType returnType] :  a1=atomExp {
                                                 $a2.start.getCharPositionInLine()
                                             );
                                         }
+                                        $esReducible = $esReducible && $a2.esReducible;
                                      }
                                     )* ;
-atomExp   returns [SymbolType returnType] :  CINT { $returnType=SymbolType.INT; } 
-                            | CDOUBLE { $returnType=SymbolType.DOUBLE; }
+atomExp   returns [SymbolType returnType, boolean esReducible] :  
+                            CINT { 
+                                $returnType=SymbolType.INT;
+                                $esReducible = true; 
+                            } 
+                            | CDOUBLE { 
+                                $returnType=SymbolType.DOUBLE; 
+                                $esReducible = true; 
+                            }
                             | ID { 
                                 // Verify if the symbol is declared
                                 if (!TSLocal.containsKey($ID.text) && !TSGlobal.containsKey($ID.text)) {
@@ -505,6 +530,7 @@ atomExp   returns [SymbolType returnType] :  CINT { $returnType=SymbolType.INT; 
                                     );
                                     // Marcamos el tipo de la variable como error
                                     $returnType = SymbolType.ERROR_TYPE;
+                                    $esReducible = false;
 
                                     break;
                                 }
@@ -515,8 +541,15 @@ atomExp   returns [SymbolType returnType] :  CINT { $returnType=SymbolType.INT; 
                                 } else {
                                     $returnType = SymbolType.nameOf(TSGlobal.get($ID.text));
                                 }
+
+                                // Consultar si la variable es estatica en tiempo de compilacion
+                                Integer bindingValue = tablaBindingTime.get($ID.text);
+                                $esReducible = (bindingValue != null && bindingValue == 1);
                              } 
-                            | '(' expresion { $returnType=$expresion.returnType; } ')' ;
+                            | '(' expresion { 
+                                $returnType=$expresion.returnType;
+                                $esReducible = $expresion.esReducible; 
+                            } ')' ;
 
 // Comparaciones
 comparacion: expresion (EQ | NEQ | GT | LT | GE | LE) expresion ;
